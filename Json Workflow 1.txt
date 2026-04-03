@@ -1,0 +1,211 @@
+{
+  "name": "GeoCarpentry - Lead Capture & Qualification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "geocarpentry-lead",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-lead-capture",
+      "name": "Webhook - Lead Capture",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.body.zip}}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "validate-zip",
+      "name": "Validate ZIP Code",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Calculate distance from Green Bay (54301)\nconst zipCode = $input.item.json.body.zip;\nconst zipDistances = {\n  '54301': 0, '54302': 3, '54303': 5, '54304': 7,\n  '54311': 10, '54313': 12, '54115': 15, '54155': 18,\n  '54162': 20, '54180': 25, '54228': 30, '54229': 35,\n  '54216': 40, '54217': 45, '54220': 50, '54227': 55,\n  '54235': 60, '54241': 65, '54245': 70, '54247': 75,\n  '54256': 80, '54170': 85, '54171': 90, '54174': 95,\n  '54177': 100\n};\n\nconst distance = zipDistances[zipCode] || 999;\nlet zone = 'Fuera de rango';\n\nif (distance <= 30) zone = 'Zona 1 (0-30mi)';\nelse if (distance <= 60) zone = 'Zona 2 (30-60mi)';\nelse if (distance <= 100) zone = 'Zona 3 (60-100mi)';\n\n// Calculate Lead Score\nconst projectType = $input.item.json.body.projectType;\nconst budget = $input.item.json.body.budget;\nconst timeline = $input.item.json.body.timeline;\n\nlet score = 0;\n\n// Project type scoring (based on Jorge's priority)\nconst projectScores = {\n  'Construcción nueva': 10,\n  'Remodelación de baño': 9,\n  'Siding': 8,\n  'Techo': 7,\n  'Remodelación completa': 6,\n  'Remodelación de cocina': 5,\n  'Complejo apartamentos': 4,\n  'Puertas/Ventanas': 3,\n  'Driveway': 2\n};\nscore += projectScores[projectType] || 0;\n\n// Budget scoring\nif (budget === '$50,000+') score += 10;\nelse if (budget === '$30,000-$50,000') score += 7;\nelse if (budget === '$15,000-$30,000') score += 5;\nelse score += 3;\n\n// Timeline scoring\nif (timeline === 'Lo antes posible') score += 10;\nelse if (timeline === '1-3 meses') score += 7;\nelse if (timeline === '3-6 meses') score += 4;\nelse score += 2;\n\n// Zone scoring\nif (zone === 'Zona 1 (0-30mi)') score += 5;\nelse if (zone === 'Zona 2 (30-60mi)') score += 3;\nelse if (zone === 'Zona 3 (60-100mi)') score += 1;\n\n// Priority\nlet priority = '🔵 COLD';\nif (score >= 25) priority = '🔥 HOT';\nelse if (score >= 18) priority = '🟡 WARM';\n\n// Reject if out of range or budget too low\nif (distance > 100) {\n  return {\n    json: {\n      status: 'rejected',\n      reason: 'Fuera de área de servicio (100 millas de Green Bay)',\n      ...($input.item.json.body)\n    }\n  };\n}\n\nreturn {\n  json: {\n    status: 'qualified',\n    timestamp: new Date().toISOString(),\n    leadId: new Date().toISOString().split('T')[0].replace(/-/g, '') + '-' + Math.floor(Math.random() * 10000),\n    distance: distance,\n    zone: zone,\n    leadScore: score,\n    priority: priority,\n    ...($input.item.json.body)\n  }\n};"
+      },
+      "id": "calculate-lead-score",
+      "name": "Calculate Lead Score & Zone",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.status}}",
+              "value2": "qualified"
+            }
+          ]
+        }
+      },
+      "id": "check-qualification",
+      "name": "Check Qualification",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "LEADS",
+        "columns": {
+          "mappings": [
+            {"from": "timestamp", "to": "Timestamp"},
+            {"from": "leadId", "to": "Lead ID"},
+            {"from": "name", "to": "Nombre"},
+            {"from": "email", "to": "Email"},
+            {"from": "phone", "to": "Teléfono"},
+            {"from": "zip", "to": "ZIP Code"},
+            {"from": "distance", "to": "Distancia (millas)"},
+            {"from": "zone", "to": "Zona"},
+            {"from": "projectType", "to": "Tipo Proyecto"},
+            {"from": "budget", "to": "Presupuesto"},
+            {"from": "timeline", "to": "Timeline"},
+            {"from": "leadScore", "to": "Lead Score"},
+            {"from": "priority", "to": "Prioridad"},
+            {"from": "status", "to": "Status"}
+          ]
+        }
+      },
+      "id": "save-to-sheets",
+      "name": "Save to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [1050, 100],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.priority}}",
+              "value2": "🔥 HOT"
+            }
+          ]
+        }
+      },
+      "id": "check-hot-lead",
+      "name": "Is HOT Lead?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1250, 100]
+    },
+    {
+      "parameters": {
+        "fromEmail": "admin@geocarpentry.com",
+        "toEmail": "admin@geocarpentry.com",
+        "subject": "🔥 HOT LEAD - {{$json.name}}",
+        "emailType": "html",
+        "message": "<h2>🔥 Nuevo Lead HOT Calificado</h2><p><strong>Nombre:</strong> {{$json.name}}<br><strong>Email:</strong> {{$json.email}}<br><strong>Teléfono:</strong> {{$json.phone}}<br><strong>Proyecto:</strong> {{$json.projectType}}<br><strong>Presupuesto:</strong> {{$json.budget}}<br><strong>Timeline:</strong> {{$json.timeline}}<br><strong>Ubicación:</strong> {{$json.zip}} ({{$json.zone}})<br><strong>Lead Score:</strong> {{$json.leadScore}}</p><p><strong>Acción requerida:</strong> Contactar ASAP para agendar estimado.</p>"
+      },
+      "id": "email-hot-lead",
+      "name": "Email - HOT Lead Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1450, 0]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "phoneNumberId": "855-642-4796",
+        "toPhoneNumber": "={{$json.phone}}",
+        "message": "Hola {{$json.name}}! Gracias por contactar a GeoCarpentry LLC. Recibimos tu solicitud para {{$json.projectType}}. Te contactaremos en las próximas 24 horas para agendar tu estimado GRATIS. - Jorge Cruz, Presidente"
+      },
+      "id": "sms-confirmation",
+      "name": "SMS - Lead Confirmation",
+      "type": "n8n-nodes-base.openPhone",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "credentials": {
+        "openPhoneApi": {
+          "id": "YOUR_OPENPHONE_API_CREDENTIAL_ID",
+          "name": "OpenPhone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Gracias! Recibimos tu información. Te contactaremos pronto para agendar tu estimado GRATIS.\", \"leadId\": $json.leadId, \"priority\": $json.priority } }}"
+      },
+      "id": "response-success",
+      "name": "Response - Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": false, \"message\": $json.reason } }}"
+      },
+      "id": "response-rejected",
+      "name": "Response - Rejected",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 400]
+    }
+  ],
+  "connections": {
+    "Webhook - Lead Capture": {
+      "main": [[{"node": "Validate ZIP Code", "type": "main", "index": 0}]]
+    },
+    "Validate ZIP Code": {
+      "main": [
+        [{"node": "Calculate Lead Score & Zone", "type": "main", "index": 0}],
+        [{"node": "Response - Rejected", "type": "main", "index": 0}]
+      ]
+    },
+    "Calculate Lead Score & Zone": {
+      "main": [[{"node": "Check Qualification", "type": "main", "index": 0}]]
+    },
+    "Check Qualification": {
+      "main": [
+        [
+          {"node": "Save to Google Sheets", "type": "main", "index": 0},
+          {"node": "SMS - Lead Confirmation", "type": "main", "index": 0}
+        ],
+        [{"node": "Response - Rejected", "type": "main", "index": 0}]
+      ]
+    },
+    "Save to Google Sheets": {
+      "main": [[{"node": "Is HOT Lead?", "type": "main", "index": 0}]]
+    },
+    "Is HOT Lead?": {
+      "main": [
+        [{"node": "Email - HOT Lead Alert", "type": "main", "index": 0}],
+        []
+      ]
+    },
+    "Email - HOT Lead Alert": {
+      "main": [[{"node": "Response - Success", "type": "main", "index": 0}]]
+    },
+    "SMS - Lead Confirmation": {
+      "main": [[{"node": "Response - Success", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
