@@ -1,0 +1,46 @@
+name: Deploy GeoBudget to Hostinger
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate config.php
+        run: |
+          printf '<?php\ndefine("ANTHROPIC_KEY","%s");\ndefine("APP_TOKEN","%s");\ndefine("DB_HOST","localhost");\ndefine("DB_NAME","%s");\ndefine("DB_USER","%s");\ndefine("DB_PASS","%s");\n' "${{ secrets.ANTHROPIC_KEY }}" "${{ secrets.APP_TOKEN }}" "${{ secrets.DB_NAME }}" "${{ secrets.DB_USER }}" "${{ secrets.DB_PASS }}" > api/config.php
+
+      - name: Setup SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add host to known_hosts
+        run: |
+          for i in 1 2 3; do
+            ssh-keyscan -p 65002 ${{ secrets.HOST }} >> ~/.ssh/known_hosts 2>/dev/null && break
+            sleep 3
+          done
+
+      - name: Create remote directory
+        run: |
+          for i in 1 2 3 4; do
+            ssh -o ConnectTimeout=15 -p 65002 ${{ secrets.SSH_USERNAME }}@${{ secrets.HOST }} "mkdir -p ~/domains/pinnaclegroupwi.com/public_html/GeoBudget/api" && break
+            sleep 4
+          done
+
+      - name: Deploy via rsync
+        run: |
+          for i in 1 2 3 4; do
+            rsync -avzr --delete \
+              -e "ssh -o ConnectTimeout=15 -p 65002" \
+              --exclude='.git' \
+              --exclude='.github' \
+              ./ ${{ secrets.SSH_USERNAME }}@${{ secrets.HOST }}:~/domains/pinnaclegroupwi.com/public_html/GeoBudget/ && break
+            sleep 4
+          done

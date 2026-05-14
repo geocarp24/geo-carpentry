@@ -1,0 +1,201 @@
+name: Setup Core Pages - Geo Carpentry
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup-core:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Core Pages
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 65002
+          script: |
+            WP_CLI="$HOME/wp-cli.phar"
+            WP_PATH="$HOME/domains/geocarpentry.com/public_html"
+            WP="php $WP_CLI --path=$WP_PATH --allow-root"
+
+            # Write home content to file
+            cat > /tmp/wp_home.html << 'HTMLEOF'
+            <div style="background:#1a1a1a;padding:12px;text-align:center;color:#fff;font-size:14px;">
+            📞 <a href="tel:9203671272" style="color:#f0a500;">(920) 367-1272</a> &nbsp;|&nbsp;
+            💬 <a href="https://wa.me/19209340351" style="color:#25D366;">WhatsApp</a> &nbsp;|&nbsp;
+            📘 <a href="https://www.facebook.com/profile.php?id=61578160947198" style="color:#1877F2;">Facebook</a> &nbsp;|&nbsp;
+            📸 <a href="https://www.instagram.com/geocarpentryllc2026" style="color:#E1306C;">Instagram</a>
+            </div>
+            <h1>Northeast Wisconsin's Premier Carpentry and Construction Company</h1>
+            <p>Geo Carpentry LLC delivers world-class carpentry and construction services across Northeast Wisconsin — from Green Bay to Appleton, Oshkosh, Sheboygan, Wausau, Manitowoc, Fond du Lac and beyond. Licensed, insured, and driven by excellence since 2014.</p>
+            <div style="background:#f0a500;padding:20px;text-align:center;border-radius:8px;margin:20px 0;">
+            <h3 style="color:#1a1a1a;margin:0 0 10px;">Ready to Start Your Project?</h3>
+            <p style="margin:0;"><strong>Call <a href="tel:9203671272">(920) 367-1272</a> | <a href="https://wa.me/19209340351">WhatsApp Us</a> | <a href="mailto:admin@geocarpentry.com">admin@geocarpentry.com</a></strong></p>
+            <p style="margin:5px 0 0;font-size:13px;">Free estimates — No obligation — We respond within 24 hours</p>
+            </div>
+            <h2>Our Services</h2>
+            <ul>
+            <li><a href="/services/custom-carpentry/">Custom Carpentry and Woodwork</a></li>
+            <li><a href="/services/kitchen-remodeling/">Kitchen Remodeling</a></li>
+            <li><a href="/services/bathroom-remodeling/">Bathroom Remodeling</a></li>
+            <li><a href="/services/deck-building/">Deck Building and Outdoor Structures</a></li>
+            <li><a href="/services/home-renovation/">Home Renovation</a></li>
+            <li><a href="/services/general-construction/">General Construction</a></li>
+            </ul>
+            <h2>Why Northeast Wisconsin Chooses Geo Carpentry LLC</h2>
+            <ul>
+            <li>✅ 10+ years of proven experience</li>
+            <li>✅ Licensed and fully insured in Wisconsin</li>
+            <li>✅ Serving 100-mile radius across Northeast Wisconsin</li>
+            <li>✅ Free estimates — no obligation</li>
+            <li>✅ Bilingual team — English and Spanish</li>
+            <li>✅ Quality materials, expert craftsmanship, on-time delivery</li>
+            </ul>
+            <h2>Our Service Area</h2>
+            <p>We proudly serve: Green Bay, Appleton, Oshkosh, Sheboygan, Manitowoc, Fond du Lac, Wausau, Marinette, Oconto, Shawano, De Pere, Ashwaubenon, Howard, Suamico, Bellevue, Allouez, Pulaski and all communities within 100 miles of Green Bay, Wisconsin.</p>
+            <h2>Follow Us</h2>
+            <p>📘 <a href="https://www.facebook.com/profile.php?id=61578160947198">Facebook</a> &nbsp;|&nbsp; 📸 <a href="https://www.instagram.com/geocarpentryllc2026">Instagram @geocarpentryllc2026</a></p>
+            <div style="background:#f0a500;padding:20px;text-align:center;border-radius:8px;margin:20px 0;">
+            <h3 style="color:#1a1a1a;margin:0 0 10px;">Get Your Free Estimate Today</h3>
+            <p style="margin:0;"><strong>Call <a href="tel:9203671272">(920) 367-1272</a> | <a href="https://wa.me/19209340351">WhatsApp Us</a></strong></p>
+            </div>
+            HTMLEOF
+
+            # Write about content to file
+            cat > /tmp/wp_about.html << 'HTMLEOF'
+            <div style="background:#1a1a1a;padding:12px;text-align:center;color:#fff;font-size:14px;">
+            📞 <a href="tel:9203671272" style="color:#f0a500;">(920) 367-1272</a> &nbsp;|&nbsp;
+            💬 <a href="https://wa.me/19209340351" style="color:#25D366;">WhatsApp</a> &nbsp;|&nbsp;
+            📘 <a href="https://www.facebook.com/profile.php?id=61578160947198" style="color:#1877F2;">Facebook</a> &nbsp;|&nbsp;
+            📸 <a href="https://www.instagram.com/geocarpentryllc2026" style="color:#E1306C;">Instagram</a>
+            </div>
+            <h1>About Geo Carpentry LLC — Northeast Wisconsin's Trusted Contractor</h1>
+            <p>Geo Carpentry LLC is a licensed and insured carpentry and construction company proudly serving Northeast Wisconsin since 2014. Built on quality, honesty, and integrity — we have earned our reputation as one of the most trusted construction companies in the region.</p>
+            <h2>Our Story</h2>
+            <p>Founded by Jorge Cruz, Geo Carpentry LLC started with a clear mission: deliver exceptional craftsmanship with the honesty and dedication that Wisconsin families and businesses deserve. From Green Bay to Appleton, Oshkosh to Sheboygan — we have built our name project by project, client by client, across Northeast Wisconsin.</p>
+            <h2>Our Values</h2>
+            <ul>
+            <li>✅ <strong>Quality:</strong> We never cut corners — every project meets the highest standards.</li>
+            <li>✅ <strong>Honesty:</strong> Transparent pricing, clear communication, zero surprises.</li>
+            <li>✅ <strong>Integrity:</strong> We do what we say, on time and on budget.</li>
+            <li>✅ <strong>Community:</strong> Proud to serve Northeast Wisconsin and its families.</li>
+            </ul>
+            <h2>Why Choose Geo Carpentry LLC?</h2>
+            <ul>
+            <li>10+ years of experience in carpentry and construction</li>
+            <li>Licensed and fully insured in Wisconsin</li>
+            <li>Serving a 100-mile radius across Northeast Wisconsin</li>
+            <li>Bilingual team — English and Spanish</li>
+            <li>Free estimates with no obligation</li>
+            <li>Locally owned and operated</li>
+            </ul>
+            <h2>Connect With Us</h2>
+            <p>
+            📞 <a href="tel:9203671272">(920) 367-1272</a><br>
+            💬 <a href="https://wa.me/19209340351">WhatsApp</a><br>
+            📧 <a href="mailto:admin@geocarpentry.com">admin@geocarpentry.com</a><br>
+            📘 <a href="https://www.facebook.com/profile.php?id=61578160947198">Facebook</a><br>
+            📸 <a href="https://www.instagram.com/geocarpentryllc2026">Instagram @geocarpentryllc2026</a><br>
+            📍 735 E Walnut St Suite 3, Green Bay, WI
+            </p>
+            <div style="background:#f0a500;padding:20px;text-align:center;border-radius:8px;margin:20px 0;">
+            <h3 style="color:#1a1a1a;margin:0 0 10px;">Ready to Start Your Project?</h3>
+            <p style="margin:0;"><strong>Call <a href="tel:9203671272">(920) 367-1272</a> | <a href="https://wa.me/19209340351">WhatsApp Us</a></strong></p>
+            </div>
+            HTMLEOF
+
+            # Write contact content to file
+            cat > /tmp/wp_contact.html << 'HTMLEOF'
+            <div style="background:#1a1a1a;padding:12px;text-align:center;color:#fff;font-size:14px;">
+            📞 <a href="tel:9203671272" style="color:#f0a500;">(920) 367-1272</a> &nbsp;|&nbsp;
+            💬 <a href="https://wa.me/19209340351" style="color:#25D366;">WhatsApp</a> &nbsp;|&nbsp;
+            📘 <a href="https://www.facebook.com/profile.php?id=61578160947198" style="color:#1877F2;">Facebook</a> &nbsp;|&nbsp;
+            📸 <a href="https://www.instagram.com/geocarpentryllc2026" style="color:#E1306C;">Instagram</a>
+            </div>
+            <h1>Contact Geo Carpentry LLC — Free Estimates Across Northeast Wisconsin</h1>
+            <p>Ready to start your project? Contact Geo Carpentry LLC today. We serve a 100-mile radius across Northeast Wisconsin and respond to all inquiries within 24 hours.</p>
+            <h2>Contact Information</h2>
+            <p>
+            📞 <strong>Phone:</strong> <a href="tel:9203671272">(920) 367-1272</a><br>
+            💬 <strong>WhatsApp:</strong> <a href="https://wa.me/19209340351">Click to message us</a><br>
+            📧 <strong>Email:</strong> <a href="mailto:admin@geocarpentry.com">admin@geocarpentry.com</a><br>
+            📘 <strong>Facebook:</strong> <a href="https://www.facebook.com/profile.php?id=61578160947198">Facebook Page</a><br>
+            📸 <strong>Instagram:</strong> <a href="https://www.instagram.com/geocarpentryllc2026">@geocarpentryllc2026</a><br>
+            📍 <strong>Office:</strong> 735 E Walnut St Suite 3, Green Bay, WI<br>
+            🕐 <strong>Hours:</strong> Monday-Friday 8am-6pm | Saturday 9am-3pm
+            </p>
+            <h2>Our Service Area</h2>
+            <p>We serve all communities within 100 miles of Green Bay including: Green Bay, Appleton, Oshkosh, Sheboygan, Manitowoc, Fond du Lac, Wausau, Marinette, Oconto, Shawano, De Pere, Ashwaubenon, Howard, Suamico, Bellevue, Allouez, Pulaski and more.</p>
+            <h2>Get Your Free Estimate</h2>
+            <p>Call or WhatsApp us at <strong>(920) 367-1272</strong> — we offer free, no-obligation estimates for all carpentry and construction projects across Northeast Wisconsin. We respond within 24 hours.</p>
+            <div style="background:#f0a500;padding:20px;text-align:center;border-radius:8px;margin:20px 0;">
+            <h3 style="color:#1a1a1a;margin:0 0 10px;">Call Us Now — Free Estimate</h3>
+            <p style="margin:0;"><strong><a href="tel:9203671272">(920) 367-1272</a> | <a href="https://wa.me/19209340351">WhatsApp</a></strong></p>
+            </div>
+            HTMLEOF
+
+            # Write portfolio content to file
+            cat > /tmp/wp_portfolio.html << 'HTMLEOF'
+            <div style="background:#1a1a1a;padding:12px;text-align:center;color:#fff;font-size:14px;">
+            📞 <a href="tel:9203671272" style="color:#f0a500;">(920) 367-1272</a> &nbsp;|&nbsp;
+            💬 <a href="https://wa.me/19209340351" style="color:#25D366;">WhatsApp</a> &nbsp;|&nbsp;
+            📘 <a href="https://www.facebook.com/profile.php?id=61578160947198" style="color:#1877F2;">Facebook</a> &nbsp;|&nbsp;
+            📸 <a href="https://www.instagram.com/geocarpentryllc2026" style="color:#E1306C;">Instagram</a>
+            </div>
+            <h1>Project Portfolio — Geo Carpentry LLC Northeast Wisconsin</h1>
+            <p>Browse completed carpentry and construction projects by Geo Carpentry LLC across Northeast Wisconsin. Every project reflects our commitment to quality craftsmanship and client satisfaction.</p>
+            <h2>Project Categories</h2>
+            <ul>
+            <li>✅ Custom Carpentry and Fine Woodwork</li>
+            <li>✅ Kitchen Remodeling and Renovations</li>
+            <li>✅ Bathroom Remodeling</li>
+            <li>✅ Deck Building and Outdoor Structures</li>
+            <li>✅ Full Home Renovations</li>
+            <li>✅ General Construction and Additions</li>
+            </ul>
+            <p>Follow us on <a href="https://www.facebook.com/profile.php?id=61578160947198">Facebook</a> and <a href="https://www.instagram.com/geocarpentryllc2026">Instagram @geocarpentryllc2026</a> to see our latest completed projects.</p>
+            <div style="background:#f0a500;padding:20px;text-align:center;border-radius:8px;margin:20px 0;">
+            <h3 style="color:#1a1a1a;margin:0 0 10px;">Start Your Project Today</h3>
+            <p style="margin:0;"><strong><a href="tel:9203671272">(920) 367-1272</a> | <a href="https://wa.me/19209340351">WhatsApp</a></strong></p>
+            </div>
+            HTMLEOF
+
+            # Create pages using files
+            HOME_ID=$($WP post create --post_type=page --post_title="Home" --post_status=publish --post_name="home" --post_content="$(cat /tmp/wp_home.html)" --porcelain)
+            echo "Home ID: $HOME_ID"
+
+            $WP post create --post_type=page --post_title="About" --post_status=publish --post_name="about" --post_content="$(cat /tmp/wp_about.html)"
+            echo "About created"
+
+            $WP post create --post_type=page --post_title="Contact" --post_status=publish --post_name="contact" --post_content="$(cat /tmp/wp_contact.html)"
+            echo "Contact created"
+
+            $WP post create --post_type=page --post_title="Portfolio" --post_status=publish --post_name="portfolio" --post_content="$(cat /tmp/wp_portfolio.html)"
+            echo "Portfolio created"
+
+            # Site settings
+            $WP option update blogname "Geo Carpentry LLC"
+            $WP option update blogdescription "Licensed Carpentry and Construction — Northeast Wisconsin"
+            $WP option update timezone_string "America/Chicago"
+            $WP option update permalink_structure "/%postname%/"
+            $WP rewrite flush
+            $WP option update show_on_front "page"
+            $WP option update page_on_front "$HOME_ID"
+
+            # Menu
+            $WP menu delete "Main Menu" 2>/dev/null || true
+            $WP menu create "Main Menu"
+            MENU_ID=$($WP menu list --format=ids | head -1)
+
+            for PAGE_NAME in home about portfolio contact; do
+              PAGE_ID=$($WP post list --post_type=page --post_status=publish --name=$PAGE_NAME --format=ids 2>/dev/null)
+              if [ ! -z "$PAGE_ID" ]; then
+                $WP menu item add-post $MENU_ID $PAGE_ID 2>/dev/null || true
+              fi
+            done
+
+            $WP menu location assign $MENU_ID primary 2>/dev/null || true
+
+            echo "✅ Core pages created successfully"

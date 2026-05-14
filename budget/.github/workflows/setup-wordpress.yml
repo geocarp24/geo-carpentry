@@ -1,0 +1,66 @@
+name: Setup WordPress - Geo Carpentry
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup-wordpress:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure WordPress via WP-CLI
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 65002
+          script: |
+            WP_PATH="$HOME/domains/geocarpentry.com/public_html"
+            WP_CLI="$HOME/wp-cli.phar"
+
+            if [ ! -f "$WP_CLI" ]; then
+              curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+              chmod +x wp-cli.phar
+              mv wp-cli.phar "$WP_CLI"
+            fi
+
+            WP="php $WP_CLI --path=$WP_PATH --allow-root"
+
+            $WP option update blogname "Geo Carpentry LLC"
+            $WP option update blogdescription "Licensed Contractor — Green Bay and Northeast Wisconsin"
+            $WP option update admin_email "admin@geocarpentry.com"
+            $WP option update timezone_string "America/Chicago"
+            $WP option update permalink_structure "/%postname%/"
+            $WP rewrite flush
+
+            $WP post delete 1 --force 2>/dev/null || true
+            $WP post delete 2 --force 2>/dev/null || true
+
+            HOME_ID=$($WP post create --post_type=page --post_title="Home" --post_status=publish --post_name="home" --porcelain)
+
+            $WP post create --post_type=page --post_title="Services" --post_status=publish --post_name="services" --post_content="<h1>Our Services</h1><p>Professional carpentry and construction services in Green Bay and Northeast Wisconsin.</p>"
+
+            $WP post create --post_type=page --post_title="About" --post_status=publish --post_name="about" --post_content="<h1>About Geo Carpentry LLC</h1><p>Licensed and insured carpentry and construction company serving Green Bay and Northeast Wisconsin.</p>"
+
+            $WP post create --post_type=page --post_title="Portfolio" --post_status=publish --post_name="portfolio" --post_content="<h1>Our Work</h1><p>Browse our portfolio of completed projects.</p>"
+
+            $WP post create --post_type=page --post_title="Contact" --post_status=publish --post_name="contact" --post_content="<h1>Contact Us</h1><p>Phone: (920) 367-1272</p><p>Email: admin@geocarpentry.com</p>"
+
+            $WP option update show_on_front "page"
+            $WP option update page_on_front "$HOME_ID"
+
+            $WP menu create "Main Menu" 2>/dev/null || true
+            MENU_ID=$($WP menu list --format=ids | head -1)
+
+            for PAGE_NAME in home services portfolio about contact; do
+              PAGE_ID=$($WP post list --post_type=page --post_status=publish --name=$PAGE_NAME --format=ids 2>/dev/null)
+              if [ ! -z "$PAGE_ID" ]; then
+                $WP menu item add-post $MENU_ID $PAGE_ID 2>/dev/null || true
+              fi
+            done
+
+            $WP menu location assign $MENU_ID primary 2>/dev/null || true
+
+            echo "WordPress setup complete for Geo Carpentry LLC"
