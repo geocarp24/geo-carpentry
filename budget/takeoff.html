@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geo Carpentry — Plan Takeoff</title>
+<link rel="icon" type="image/png" href="logo.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;color:#1a1a2e;overflow:hidden;height:100vh;display:flex;flex-direction:column}
+/* TOPNAV */
+.topnav{background:#1B3A6B;color:#fff;padding:0 24px;display:flex;align-items:center;gap:12px;height:56px;flex-shrink:0;z-index:100}
+.topnav img{height:34px}
+.nav-title{font-weight:700;font-size:1rem;flex:1}
+.nav-sub{font-size:.75rem;opacity:.65}
+.btn-nav{background:rgba(255,255,255,.15);color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:.82rem;cursor:pointer;transition:background .2s;font-weight:600;white-space:nowrap;text-decoration:none;display:inline-block}
+.btn-nav:hover{background:rgba(255,255,255,.28)}
+/* TOOLBAR */
+.toolbar{background:#fff;border-bottom:1px solid #e0e0e0;padding:8px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.tb-btn{background:#f0f2f5;color:#1B3A6B;border:1px solid #d0d5e0;padding:7px 14px;border-radius:6px;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tb-btn:hover{background:#e0e4f0;border-color:#1B3A6B}
+.tb-btn.active{background:#1B3A6B;color:#fff;border-color:#1B3A6B}
+.tb-btn.danger{color:#e53e3e;border-color:#e0a0a0}
+.tb-btn.danger:hover{background:#fff0f0;border-color:#e53e3e}
+.tb-sep{width:1px;height:28px;background:#d0d5e0;margin:0 4px}
+#fileInput{display:none}
+/* MAIN LAYOUT */
+.main-wrap{display:flex;flex:1;overflow:hidden}
+/* CANVAS AREA */
+.canvas-area{flex:1;position:relative;background:#888;overflow:auto}
+.canvas-container{position:relative;display:inline-block}
+#planCanvas{display:block;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+#overlayCanvas{position:absolute;top:0;left:0;cursor:crosshair}
+/* UPLOAD ZONE */
+.upload-zone{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:10;background:#e0e2e8}
+.upload-zone.hidden{display:none}
+.upload-box{background:#fff;border:2px dashed #c0c8e0;border-radius:16px;padding:60px 48px;text-align:center;cursor:pointer;transition:all .2s;max-width:440px}
+.upload-box:hover{border-color:#1B3A6B;background:#f8f9ff}
+.upload-box .icon{font-size:3rem;color:#1B3A6B;margin-bottom:12px}
+.upload-box h3{color:#1B3A6B;margin-bottom:6px;font-size:1.1rem}
+.upload-box p{color:#888;font-size:.85rem}
+/* SIDE PANEL */
+.side-panel{width:250px;background:#fff;border-left:1px solid #e0e0e0;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.sp-header{padding:14px 16px;border-bottom:1px solid #e0e0e0;font-weight:700;color:#1B3A6B;font-size:.9rem}
+.sp-list{flex:1;overflow-y:auto;padding:8px 0}
+.sp-item{padding:6px 16px;font-size:.8rem;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center}
+.sp-item .lbl{color:#333;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;border-radius:3px;padding:1px 3px}
+.sp-item .lbl:hover{background:#f0f4ff;color:#1B3A6B}
+.sp-item .lbl-input{flex:1;border:1.5px solid #1B3A6B;border-radius:4px;padding:2px 5px;font-size:.8rem;outline:none;min-width:0}
+.sp-item .val{font-weight:700;color:#1B3A6B;margin-left:8px;flex-shrink:0}
+.sp-item .del-m{background:none;border:none;color:#ccc;cursor:pointer;font-size:.85rem;margin-left:6px;padding:2px 4px;border-radius:3px}
+.sp-item .del-m:hover{color:#e53e3e;background:#fff0f0}
+.sp-totals{border-top:2px solid #1B3A6B;padding:14px 16px}
+.sp-totals .row{display:flex;justify-content:space-between;margin-bottom:6px;font-size:.85rem}
+.sp-totals .row .k{color:#666;font-weight:600}
+.sp-totals .row .v{color:#1B3A6B;font-weight:700}
+.sp-export{padding:12px 16px;border-top:1px solid #e0e0e0}
+.sp-export button{width:100%;padding:9px;background:#1B3A6B;color:#fff;border:none;border-radius:6px;font-size:.82rem;font-weight:700;cursor:pointer;transition:background .2s}
+.sp-export button:hover{background:#152d55}
+/* CALIBRATE MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:12px;padding:28px 32px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:100%;max-width:360px}
+.modal-box h3{color:#1B3A6B;margin-bottom:12px;font-size:1rem}
+.modal-box p{color:#666;font-size:.85rem;margin-bottom:14px}
+.modal-box input{width:100%;padding:10px 12px;border:2px solid #e0e0e0;border-radius:6px;font-size:1rem;outline:none;margin-bottom:12px}
+.modal-box input:focus{border-color:#1B3A6B}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+.modal-actions button{padding:8px 18px;border-radius:6px;font-size:.85rem;font-weight:700;cursor:pointer;border:none;transition:background .2s}
+.modal-actions .cancel{background:#f0f0f0;color:#666}
+.modal-actions .cancel:hover{background:#e0e0e0}
+.modal-actions .confirm{background:#1B3A6B;color:#fff}
+.modal-actions .confirm:hover{background:#152d55}
+/* STATUS BAR */
+.status-bar{background:#1B3A6B;color:rgba(255,255,255,.8);font-size:.75rem;padding:4px 16px;flex-shrink:0;display:flex;gap:16px}
+/* LOUPE */
+#loupe{position:fixed;bottom:48px;right:262px;width:160px;height:160px;border-radius:50%;box-shadow:0 4px 20px rgba(0,0,0,.5);display:none;z-index:90;pointer-events:none;border:3px solid #1B3A6B}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script>
+// Disable web worker — avoids cross-origin CORS issues in Safari
+// PDF.js runs in main thread (slower but universally compatible)
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+}
+</script>
+</head>
+<body>
+
+<!-- TOPNAV -->
+<nav class="topnav">
+  <img src="logo.png" alt="Geo Carpentry">
+  <div><div class="nav-title">Plan Takeoff</div><div class="nav-sub">Geo Carpentry LLC</div></div>
+  <a href="index.html" class="btn-nav">&#9664; Budget Builder</a>
+</nav>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <button class="tb-btn" id="btnOpen" onclick="document.getElementById('fileInput').click()">&#128194; Open Plan</button>
+  <input type="file" id="fileInput" accept="image/*,.pdf" onchange="handleFileOpen(this)">
+  <div class="tb-sep"></div>
+  <button class="tb-btn" id="btnCalibrate" onclick="startCalibrate()">&#9474; Calibrate Scale</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" id="btnLinear" onclick="setTool('linear')">&#9135; Linear LF</button>
+  <button class="tb-btn" id="btnArea" onclick="setTool('area')">&#11036; Area SF</button>
+  <button class="tb-btn" id="btnCount" onclick="setTool('count')">&#9679; Count EA</button>
+  <button class="tb-btn" id="btnLabel" onclick="setTool('label')">&#128204; Label</button>
+  <button class="tb-btn" id="btnFinish" onclick="finishCurrent()" style="display:none">&#10003; Finish</button>
+  <button class="tb-btn" id="btnUndo" onclick="undoLast()" style="display:none">&#8617; Undo</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn danger" onclick="clearAll()">&#10005; Clear All</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" id="btnPrevPage" onclick="goToPdfPage(-1)" style="display:none">&#9664; Prev Page</button>
+  <span id="pageIndicator" style="display:none;font-size:.8rem;font-weight:700;color:#1B3A6B;padding:0 4px"></span>
+  <button class="tb-btn" id="btnNextPage" onclick="goToPdfPage(1)" style="display:none">Next Page &#9654;</button>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <!-- Canvas area -->
+  <div class="canvas-area" id="canvasArea">
+    <!-- Upload zone -->
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      <div class="upload-box">
+        <div class="icon">&#128196;</div>
+        <h3>Open a Plan Image or PDF</h3>
+        <p>Click here or use the Open Plan button above.<br>Supports JPG, PNG, and PDF files.</p>
+      </div>
+    </div>
+    <div class="canvas-container" id="canvasContainer">
+      <canvas id="planCanvas"></canvas>
+      <canvas id="overlayCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Side panel -->
+  <div class="side-panel">
+    <div class="sp-header">Measurements</div>
+    <div class="sp-list" id="measureList"></div>
+    <div class="sp-totals" id="totalPanel">
+      <div class="row"><span class="k">Linear Total</span><span class="v" id="totLF">0.00 LF</span></div>
+      <div class="row"><span class="k">Area Total</span><span class="v" id="totSF">0.00 SF</span></div>
+      <div class="row"><span class="k">Count Total</span><span class="v" id="totEA">0 EA</span></div>
+    </div>
+    <div class="sp-export">
+      <button onclick="exportTxt()">&#128190; Export .txt</button>
+    </div>
+  </div>
+</div>
+
+<!-- Loupe magnifier -->
+<canvas id="loupe" width="160" height="160"></canvas>
+
+<!-- Status bar -->
+<div class="status-bar">
+  <span id="statusTool">Tool: None</span>
+  <span id="statusScale">Scale: Not calibrated</span>
+  <span id="statusHint">Open a plan to begin</span>
+</div>
+
+<!-- Calibrate modal -->
+<div class="modal-overlay" id="calModal">
+  <div class="modal-box">
+    <h3>Calibrate Scale</h3>
+    <p id="calPrompt">Click two points on the plan that represent a known distance, then enter the real-world length in feet.</p>
+    <input type="number" id="calFeet" placeholder="Distance in feet" step="any" min="0.01" style="display:none">
+    <div class="modal-actions">
+      <button class="cancel" id="calRedoBtn" onclick="redoCalPoints()" style="display:none">&#8617; Redo Points</button>
+      <button class="cancel" onclick="cancelCalibrate()">Cancel</button>
+      <button class="confirm" id="calConfirm" onclick="confirmCalibrate()" style="display:none">Set Scale</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────
+let planImg = null;
+let scale = 0; // pixels per foot
+let currentTool = null; // 'linear','area','count','label'
+let measurements = []; // {id,type,points,value,label}
+let tempPoints = [];
+let nextId = 1;
+let countNum = 1;
+let calPoints = [];
+let calMode = false;
+
+const planCanvas = document.getElementById('planCanvas');
+const overlay = document.getElementById('overlayCanvas');
+const planCtx = planCanvas.getContext('2d');
+const ctx = overlay.getContext('2d');
+const container = document.getElementById('canvasContainer');
+
+// ─── Loupe ────────────────────────────────────────────────
+const loupe = document.getElementById('loupe');
+const loupeCtx = loupe.getContext('2d');
+const LOUPE_PX = 160;
+const LOUPE_ZOOM = 4; // 4x magnification
+
+overlay.addEventListener('mousemove', function(e) {
+  if (!planImg) { loupe.style.display = 'none'; return; }
+  const rect = overlay.getBoundingClientRect();
+  const sx = overlay.width / rect.width;
+  const sy = overlay.height / rect.height;
+  const x = (e.clientX - rect.left) * sx;
+  const y = (e.clientY - rect.top) * sy;
+  loupe.style.display = 'block';
+  drawLoupe(x, y);
+});
+
+overlay.addEventListener('mouseleave', function() {
+  loupe.style.display = 'none';
+});
+
+function drawLoupe(x, y) {
+  const half = LOUPE_PX / (2 * LOUPE_ZOOM); // source half-size in canvas pixels
+  loupeCtx.clearRect(0, 0, LOUPE_PX, LOUPE_PX);
+
+  // Clip to circle
+  loupeCtx.save();
+  loupeCtx.beginPath();
+  loupeCtx.arc(LOUPE_PX / 2, LOUPE_PX / 2, LOUPE_PX / 2, 0, Math.PI * 2);
+  loupeCtx.clip();
+
+  // Draw magnified plan
+  loupeCtx.drawImage(planCanvas, x - half, y - half, half * 2, half * 2, 0, 0, LOUPE_PX, LOUPE_PX);
+  // Draw magnified overlay (measurements, cal points)
+  loupeCtx.drawImage(overlay, x - half, y - half, half * 2, half * 2, 0, 0, LOUPE_PX, LOUPE_PX);
+
+  // Crosshair
+  loupeCtx.strokeStyle = 'rgba(220,30,30,0.85)';
+  loupeCtx.lineWidth = 1.5;
+  loupeCtx.setLineDash([5, 3]);
+  loupeCtx.beginPath();
+  loupeCtx.moveTo(LOUPE_PX / 2, 0); loupeCtx.lineTo(LOUPE_PX / 2, LOUPE_PX);
+  loupeCtx.moveTo(0, LOUPE_PX / 2); loupeCtx.lineTo(LOUPE_PX, LOUPE_PX / 2);
+  loupeCtx.stroke();
+  loupeCtx.setLineDash([]);
+
+  loupeCtx.restore();
+
+  // Outer ring
+  loupeCtx.strokeStyle = '#1B3A6B';
+  loupeCtx.lineWidth = 2;
+  loupeCtx.beginPath();
+  loupeCtx.arc(LOUPE_PX / 2, LOUPE_PX / 2, LOUPE_PX / 2 - 1, 0, Math.PI * 2);
+  loupeCtx.stroke();
+}
+
+// ─── Undo ─────────────────────────────────────────────────
+function undoLast() {
+  if (calMode) {
+    // If modal is open (2 points placed), go back to re-place them
+    if (document.getElementById('calModal').classList.contains('open')) {
+      redoCalPoints();
+      return;
+    }
+    if (calPoints.length > 0) {
+      calPoints.pop();
+      redraw();
+      drawCalPoints();
+      if (calPoints.length === 0) {
+        document.getElementById('statusHint').textContent = 'Calibrate: click the FIRST point on the plan.';
+      } else {
+        document.getElementById('statusHint').textContent = 'Calibrate: click the SECOND point on the plan.';
+      }
+    }
+    return;
+  }
+
+  if ((currentTool === 'linear' || currentTool === 'area') && tempPoints.length > 0) {
+    tempPoints.pop();
+    redraw();
+    drawTemp();
+    return;
+  }
+
+  // Undo last completed measurement
+  if (measurements.length > 0) {
+    measurements.pop();
+    nextId = measurements.length > 0 ? Math.max(...measurements.map(m => m.id)) + 1 : 1;
+    countNum = measurements.filter(m => m.type === 'count').length + 1;
+    updateList();
+    redraw();
+  }
+}
+
+function redoCalPoints() {
+  document.getElementById('calModal').classList.remove('open');
+  document.getElementById('calRedoBtn').style.display = 'none';
+  document.getElementById('calConfirm').style.display = 'none';
+  document.getElementById('calFeet').style.display = 'none';
+  calPoints = [];
+  redraw();
+  document.getElementById('statusHint').textContent = 'Calibrate: click the FIRST point on the plan.';
+}
+
+function updateUndoBtn() {
+  const canUndo = calMode
+    ? calPoints.length > 0 || document.getElementById('calModal').classList.contains('open')
+    : tempPoints.length > 0 || measurements.length > 0;
+  document.getElementById('btnUndo').style.display = (planImg && canUndo) ? '' : 'none';
+}
+
+// ─── File handling ────────────────────────────────────────
+function handleFileOpen(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  if (file.type === 'application/pdf') {
+    convertPDF(file);
+  } else if (file.type.startsWith('image/')) {
+    loadImage(URL.createObjectURL(file));
+  } else {
+    alert('Unsupported file type. Use an image or PDF.');
+  }
+  input.value = '';
+}
+
+let pdfDoc = null;
+let currentPdfPage = 1;
+
+function convertPDF(file) {
+  if (typeof pdfjsLib === 'undefined') {
+    document.getElementById('statusHint').textContent = 'ERROR: PDF library failed to load. Reload the page.';
+    return;
+  }
+
+  document.getElementById('statusHint').textContent = 'Loading PDF...';
+
+  var reader = new FileReader();
+  reader.onerror = function() {
+    document.getElementById('statusHint').textContent = 'ERROR: Could not read the file.';
+  };
+  reader.onload = function() {
+    var data = new Uint8Array(reader.result);
+    document.getElementById('statusHint').textContent = 'Processing PDF (' + Math.round(data.length/1024) + ' KB)...';
+
+    pdfjsLib.getDocument({data: data, disableWorker: true}).promise.then(function(pdf) {
+      pdfDoc = pdf;
+      currentPdfPage = 1;
+      document.getElementById('statusHint').textContent = 'Rendering page 1 of ' + pdf.numPages + '...';
+      return renderPdfPage(pdf, 1);
+    }).catch(function(err) {
+      document.getElementById('statusHint').textContent = 'PDF Error: ' + (err.message || String(err));
+    });
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderPdfPage(pdf, pageNum) {
+  return pdf.getPage(pageNum).then(function(page) {
+    var vp = page.getViewport({scale: 1.5});
+
+    planCanvas.width = vp.width;
+    planCanvas.height = vp.height;
+    overlay.width = vp.width;
+    overlay.height = vp.height;
+    container.style.width = vp.width + 'px';
+    container.style.height = vp.height + 'px';
+
+    return page.render({canvasContext: planCtx, viewport: vp}).promise;
+  }).then(function() {
+    planImg = {width: planCanvas.width, height: planCanvas.height};
+    document.getElementById('uploadZone').classList.add('hidden');
+    var pageInfo = pdfDoc ? ' (Page ' + pageNum + ' of ' + pdfDoc.numPages + ')' : '';
+    document.getElementById('statusHint').textContent = 'PDF loaded' + pageInfo + '. Calibrate scale, then measure.';
+    updatePageNav();
+    redraw();
+  }).catch(function(err) {
+    document.getElementById('statusHint').textContent = 'Render Error: ' + (err.message || String(err));
+  });
+}
+
+function updatePageNav() {
+  if (!pdfDoc || pdfDoc.numPages <= 1) {
+    document.getElementById('btnPrevPage').style.display = 'none';
+    document.getElementById('btnNextPage').style.display = 'none';
+    document.getElementById('pageIndicator').style.display = 'none';
+    return;
+  }
+  document.getElementById('btnPrevPage').style.display = '';
+  document.getElementById('btnNextPage').style.display = '';
+  document.getElementById('pageIndicator').style.display = '';
+  document.getElementById('pageIndicator').textContent = currentPdfPage + ' / ' + pdfDoc.numPages;
+  document.getElementById('btnPrevPage').disabled = currentPdfPage <= 1;
+  document.getElementById('btnNextPage').disabled = currentPdfPage >= pdfDoc.numPages;
+}
+
+function goToPdfPage(delta) {
+  if (!pdfDoc) return;
+  var newPage = currentPdfPage + delta;
+  if (newPage < 1 || newPage > pdfDoc.numPages) return;
+  currentPdfPage = newPage;
+  document.getElementById('statusHint').textContent = 'Loading page ' + currentPdfPage + '...';
+  renderPdfPage(pdfDoc, currentPdfPage);
+}
+
+function loadImage(src) {
+  const img = new Image();
+  img.onload = function() {
+    planImg = img;
+    planCanvas.width = img.width;
+    planCanvas.height = img.height;
+    overlay.width = img.width;
+    overlay.height = img.height;
+    container.style.width = img.width + 'px';
+    container.style.height = img.height + 'px';
+    planCtx.drawImage(img, 0, 0);
+    document.getElementById('uploadZone').classList.add('hidden');
+    document.getElementById('statusHint').textContent = 'Plan loaded. Calibrate scale, then measure.';
+    redraw();
+  };
+  img.onerror = function() { alert('Failed to load image.'); };
+  img.src = src;
+}
+
+// ─── Tools ────────────────────────────────────────────────
+function setTool(tool) {
+  if (!planImg) { alert('Open a plan first.'); return; }
+  if (calMode) return;
+  finishCurrent();
+  currentTool = tool;
+  tempPoints = [];
+  document.querySelectorAll('.tb-btn').forEach(b => b.classList.remove('active'));
+  const map = { linear: 'btnLinear', area: 'btnArea', count: 'btnCount', label: 'btnLabel' };
+  if (map[tool]) document.getElementById(map[tool]).classList.add('active');
+
+  const hints = {
+    linear: 'Click points for polyline. Double-click or Finish to end.',
+    area: 'Click points for polygon. Double-click or Finish to close.',
+    count: 'Click to place count markers.',
+    label: 'Click to place a label pin.'
+  };
+  document.getElementById('statusTool').textContent = 'Tool: ' + tool.charAt(0).toUpperCase() + tool.slice(1);
+  document.getElementById('statusHint').textContent = hints[tool] || '';
+  document.getElementById('btnFinish').style.display = (tool === 'linear' || tool === 'area') ? '' : 'none';
+}
+
+function finishCurrent() {
+  if (currentTool === 'linear' && tempPoints.length >= 2) {
+    addLinear(tempPoints.slice());
+  } else if (currentTool === 'area' && tempPoints.length >= 3) {
+    addArea(tempPoints.slice());
+  }
+  tempPoints = [];
+  redraw();
+  updateUndoBtn();
+}
+
+// ─── Calibrate ────────────────────────────────────────────
+function startCalibrate() {
+  if (!planImg) { alert('Open a plan first.'); return; }
+  calMode = true;
+  calPoints = [];
+  currentTool = null;
+  tempPoints = [];
+  document.querySelectorAll('.tb-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btnCalibrate').classList.add('active');
+  // Do NOT open modal yet — it would block canvas clicks.
+  // Modal only opens after both points are placed.
+  document.getElementById('statusHint').textContent = 'Calibrate: click the FIRST point on the plan.';
+}
+
+function cancelCalibrate() {
+  calMode = false;
+  calPoints = [];
+  document.getElementById('calModal').classList.remove('open');
+  document.getElementById('btnCalibrate').classList.remove('active');
+  document.getElementById('statusHint').textContent = '';
+  redraw();
+}
+
+function confirmCalibrate() {
+  const ft = parseFloat(document.getElementById('calFeet').value);
+  if (!ft || ft <= 0) { alert('Enter a valid distance in feet.'); return; }
+  const dx = calPoints[1].x - calPoints[0].x;
+  const dy = calPoints[1].y - calPoints[0].y;
+  const px = Math.sqrt(dx * dx + dy * dy);
+  scale = px / ft;
+  calMode = false;
+  calPoints = [];
+  document.getElementById('calModal').classList.remove('open');
+  document.getElementById('btnCalibrate').classList.remove('active');
+  document.getElementById('statusScale').textContent = 'Scale: ' + scale.toFixed(2) + ' px/ft';
+  document.getElementById('statusHint').textContent = 'Scale set. Select a measurement tool.';
+  recalcAll();
+  redraw();
+  updateUndoBtn();
+}
+
+// ─── Canvas clicks ────────────────────────────────────────
+overlay.addEventListener('click', function(e) {
+  if (!planImg) return;
+  const rect = overlay.getBoundingClientRect();
+  const sx = overlay.width / rect.width;
+  const sy = overlay.height / rect.height;
+  const x = (e.clientX - rect.left) * sx;
+  const y = (e.clientY - rect.top) * sy;
+
+  if (calMode) {
+    calPoints.push({ x, y });
+    redraw();
+    drawCalPoints();
+    if (calPoints.length === 1) {
+      document.getElementById('statusHint').textContent = 'Calibrate: click the SECOND point on the plan.';
+    } else if (calPoints.length === 2) {
+      // Both points placed — now open modal to enter distance
+      document.getElementById('calPrompt').textContent = 'Enter the real-world distance between the two points.';
+      document.getElementById('calFeet').style.display = '';
+      document.getElementById('calFeet').value = '';
+      document.getElementById('calConfirm').style.display = '';
+      document.getElementById('calRedoBtn').style.display = '';
+      document.getElementById('calModal').classList.add('open');
+      document.getElementById('calFeet').focus();
+      document.getElementById('statusHint').textContent = 'Enter distance in feet and confirm.';
+    }
+    updateUndoBtn();
+    return;
+  }
+
+  if (currentTool === 'linear' || currentTool === 'area') {
+    tempPoints.push({ x, y });
+    redraw();
+    drawTemp();
+    updateUndoBtn();
+  } else if (currentTool === 'count') {
+    addCount(x, y);
+  } else if (currentTool === 'label') {
+    const text = prompt('Enter label text:');
+    if (text) addLabel(x, y, text);
+  }
+});
+
+overlay.addEventListener('dblclick', function(e) {
+  e.preventDefault();
+  if (currentTool === 'linear' || currentTool === 'area') {
+    // Remove the extra point added by the second click
+    if (tempPoints.length > 1) tempPoints.pop();
+    finishCurrent();
+  }
+});
+
+// ─── Measurement creation ─────────────────────────────────
+function addLinear(pts) {
+  let totalPx = 0;
+  for (let i = 1; i < pts.length; i++) {
+    const dx = pts[i].x - pts[i-1].x;
+    const dy = pts[i].y - pts[i-1].y;
+    totalPx += Math.sqrt(dx * dx + dy * dy);
+  }
+  const ft = scale > 0 ? totalPx / scale : 0;
+  measurements.push({ id: nextId++, type: 'linear', points: pts, value: ft, label: 'Linear ' + nextId });
+  updateList();
+  updateUndoBtn();
+}
+
+function addArea(pts) {
+  let areaPx = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const j = (i + 1) % pts.length;
+    areaPx += pts[i].x * pts[j].y;
+    areaPx -= pts[j].x * pts[i].y;
+  }
+  areaPx = Math.abs(areaPx) / 2;
+  const sf = scale > 0 ? areaPx / (scale * scale) : 0;
+  measurements.push({ id: nextId++, type: 'area', points: pts, value: sf, label: 'Area ' + nextId });
+  updateList();
+  updateUndoBtn();
+}
+
+function addCount(x, y) {
+  measurements.push({ id: nextId++, type: 'count', points: [{ x, y }], value: 1, label: '#' + countNum });
+  countNum++;
+  updateList();
+  redraw();
+  updateUndoBtn();
+}
+
+function addLabel(x, y, text) {
+  measurements.push({ id: nextId++, type: 'label', points: [{ x, y }], value: 0, label: text });
+  updateList();
+  redraw();
+  updateUndoBtn();
+}
+
+function deleteMeasurement(id) {
+  measurements = measurements.filter(m => m.id !== id);
+  updateList();
+  redraw();
+  updateUndoBtn();
+}
+
+// ─── Recalculate on scale change ──────────────────────────
+function recalcAll() {
+  measurements.forEach(m => {
+    if (m.type === 'linear') {
+      let totalPx = 0;
+      for (let i = 1; i < m.points.length; i++) {
+        const dx = m.points[i].x - m.points[i-1].x;
+        const dy = m.points[i].y - m.points[i-1].y;
+        totalPx += Math.sqrt(dx * dx + dy * dy);
+      }
+      m.value = scale > 0 ? totalPx / scale : 0;
+    } else if (m.type === 'area') {
+      let areaPx = 0;
+      for (let i = 0; i < m.points.length; i++) {
+        const j = (i + 1) % m.points.length;
+        areaPx += m.points[i].x * m.points[j].y;
+        areaPx -= m.points[j].x * m.points[i].y;
+      }
+      areaPx = Math.abs(areaPx) / 2;
+      m.value = scale > 0 ? areaPx / (scale * scale) : 0;
+    }
+  });
+  updateList();
+}
+
+// ─── Drawing ──────────────────────────────────────────────
+function redraw() {
+  ctx.clearRect(0, 0, overlay.width, overlay.height);
+
+  measurements.forEach(m => {
+    if (m.type === 'linear') {
+      ctx.strokeStyle = '#FF6B00';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      m.points.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+      ctx.stroke();
+      // dots
+      m.points.forEach(p => {
+        ctx.fillStyle = '#FF6B00';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      // label
+      if (m.points.length >= 2) {
+        const mp = m.points[Math.floor(m.points.length / 2)];
+        drawTag(mp.x, mp.y - 12, m.value.toFixed(2) + ' LF', '#FF6B00');
+      }
+    } else if (m.type === 'area') {
+      ctx.fillStyle = 'rgba(27,58,107,0.15)';
+      ctx.strokeStyle = '#1B3A6B';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      m.points.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // centroid label
+      let cx = 0, cy = 0;
+      m.points.forEach(p => { cx += p.x; cy += p.y; });
+      cx /= m.points.length; cy /= m.points.length;
+      drawTag(cx, cy, m.value.toFixed(2) + ' SF', '#1B3A6B');
+    } else if (m.type === 'count') {
+      const p = m.points[0];
+      ctx.fillStyle = '#e53e3e';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 11px Segoe UI, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(m.label, p.x, p.y);
+    } else if (m.type === 'label') {
+      const p = m.points[0];
+      // pin
+      ctx.fillStyle = '#FF6B00';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y - 16, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#FF6B00';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y - 8);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      drawTag(p.x, p.y - 30, m.label, '#333');
+    }
+  });
+}
+
+function drawTemp() {
+  if (tempPoints.length === 0) return;
+  const isArea = currentTool === 'area';
+  ctx.strokeStyle = isArea ? '#1B3A6B' : '#FF6B00';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  tempPoints.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  ctx.stroke();
+  ctx.setLineDash([]);
+  tempPoints.forEach(p => {
+    ctx.fillStyle = isArea ? '#1B3A6B' : '#FF6B00';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function drawCalPoints() {
+  calPoints.forEach(p => {
+    ctx.fillStyle = '#38a169';
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  });
+  if (calPoints.length === 2) {
+    ctx.strokeStyle = '#38a169';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(calPoints[0].x, calPoints[0].y);
+    ctx.lineTo(calPoints[1].x, calPoints[1].y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+}
+
+function drawTag(x, y, text, bg) {
+  ctx.font = 'bold 12px Segoe UI, sans-serif';
+  const w = ctx.measureText(text).width + 12;
+  ctx.fillStyle = bg;
+  ctx.beginPath();
+  const r = 4;
+  ctx.roundRect(x - w / 2, y - 10, w, 20, r);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, y);
+}
+
+// ─── Side panel ───────────────────────────────────────────
+function updateList() {
+  const list = document.getElementById('measureList');
+  list.innerHTML = '';
+  measurements.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'sp-item';
+    let valStr = '';
+    if (m.type === 'linear') valStr = m.value.toFixed(2) + ' LF';
+    else if (m.type === 'area') valStr = m.value.toFixed(2) + ' SF';
+    else if (m.type === 'count') valStr = '1 EA';
+    else valStr = 'Pin';
+
+    const lbl = document.createElement('span');
+    lbl.className = 'lbl';
+    lbl.title = 'Click to rename';
+    lbl.textContent = m.label;
+    lbl.addEventListener('click', function() { startRename(m.id, lbl); });
+
+    const val = document.createElement('span');
+    val.className = 'val';
+    val.textContent = valStr;
+
+    const del = document.createElement('button');
+    del.className = 'del-m';
+    del.title = 'Delete';
+    del.innerHTML = '&times;';
+    del.addEventListener('click', function() { deleteMeasurement(m.id); });
+
+    div.appendChild(lbl);
+    div.appendChild(val);
+    div.appendChild(del);
+    list.appendChild(div);
+  });
+  updateTotals();
+}
+
+function startRename(id, lblEl) {
+  const m = measurements.find(m => m.id === id);
+  if (!m) return;
+
+  const input = document.createElement('input');
+  input.className = 'lbl-input';
+  input.value = m.label;
+  lblEl.replaceWith(input);
+  input.focus();
+  input.select();
+
+  function save() {
+    const newLabel = input.value.trim() || m.label;
+    m.label = newLabel;
+    redraw(); // refresh tags on canvas
+    updateList();
+  }
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { input.blur(); }
+    if (e.key === 'Escape') { input.value = m.label; input.blur(); }
+  });
+}
+
+function updateTotals() {
+  let lf = 0, sf = 0, ea = 0;
+  measurements.forEach(m => {
+    if (m.type === 'linear') lf += m.value;
+    else if (m.type === 'area') sf += m.value;
+    else if (m.type === 'count') ea += m.value;
+  });
+  document.getElementById('totLF').textContent = lf.toFixed(2) + ' LF';
+  document.getElementById('totSF').textContent = sf.toFixed(2) + ' SF';
+  document.getElementById('totEA').textContent = ea + ' EA';
+}
+
+// ─── Export ───────────────────────────────────────────────
+function exportTxt() {
+  if (measurements.length === 0) { alert('No measurements to export.'); return; }
+  let lines = ['Geo Carpentry — Plan Takeoff Export', '═'.repeat(40), ''];
+  if (scale > 0) lines.push('Scale: ' + scale.toFixed(2) + ' px/ft', '');
+
+  const linears = measurements.filter(m => m.type === 'linear');
+  const areas = measurements.filter(m => m.type === 'area');
+  const counts = measurements.filter(m => m.type === 'count');
+  const labels = measurements.filter(m => m.type === 'label');
+
+  if (linears.length) {
+    lines.push('── LINEAR (LF) ──');
+    let totL = 0;
+    linears.forEach(m => { lines.push('  ' + m.label + ': ' + m.value.toFixed(2) + ' LF'); totL += m.value; });
+    lines.push('  TOTAL: ' + totL.toFixed(2) + ' LF', '');
+  }
+  if (areas.length) {
+    lines.push('── AREA (SF) ──');
+    let totA = 0;
+    areas.forEach(m => { lines.push('  ' + m.label + ': ' + m.value.toFixed(2) + ' SF'); totA += m.value; });
+    lines.push('  TOTAL: ' + totA.toFixed(2) + ' SF', '');
+  }
+  if (counts.length) {
+    lines.push('── COUNT (EA) ──');
+    lines.push('  Total items: ' + counts.length + ' EA', '');
+  }
+  if (labels.length) {
+    lines.push('── LABELS ──');
+    labels.forEach(m => lines.push('  ' + m.label));
+    lines.push('');
+  }
+
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'takeoff-export.txt';
+  a.click();
+}
+
+// ─── Clear ────────────────────────────────────────────────
+function clearAll() {
+  if (measurements.length === 0 && !planImg) return;
+  if (!confirm('Clear all measurements and plan?')) return;
+  measurements = [];
+  tempPoints = [];
+  calPoints = [];
+  calMode = false;
+  currentTool = null;
+  scale = 0;
+  countNum = 1;
+  nextId = 1;
+  planImg = null;
+  planCtx.clearRect(0, 0, planCanvas.width, planCanvas.height);
+  ctx.clearRect(0, 0, overlay.width, overlay.height);
+  document.getElementById('uploadZone').classList.remove('hidden');
+  document.querySelectorAll('.tb-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btnFinish').style.display = 'none';
+  document.getElementById('statusTool').textContent = 'Tool: None';
+  document.getElementById('statusScale').textContent = 'Scale: Not calibrated';
+  document.getElementById('statusHint').textContent = 'Open a plan to begin';
+  updateList();
+}
+
+// ─── Utility ──────────────────────────────────────────────
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
