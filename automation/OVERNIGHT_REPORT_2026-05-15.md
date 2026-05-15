@@ -9,13 +9,34 @@
 
 Mientras dormías:
 - **El sitio quedó live con HTTPS** (cert Let's Encrypt, válido 90 días auto-renueva)
-- **El primer baseline SEO corrió** — score **58/100** (esperable para sitio nuevo, hay mucho gap = mucho upside)
-- **10 de 12 quick wins de polish visual aplicados** sin tocar tu agenda — sitio se ve significativamente más profesional ya
+- **SEO score: 58 → 63 (+5 pts, ~9% mejora)** en 3 ciclos de Posicionador con polish entre medio
+- **10 de 12 quick wins de polish visual aplicados** + Service schema markup + post_title rewrites (H1s ahora keyword-rich)
 - **Tu corrección del messaging "custom carpentry"** aplicada a 7 lugares (incluyendo un blog post movido a draft)
 - **El Escriba (motor de blogs SEO) está activo** — generó las 2 primeras ideas (Kitchen Cost en Green Bay + Permit Brown County) listas para tu revisión
 - **El Dashboard de Geo en InvestorOS** está construido como código (apps/investoros/src/app/(dashboard)/geo/), va a mostrar tus KPIs en un solo lugar — falta `npm install` para verlo en localhost
+- **TASK 6 skeletons construidos:** El Embajador (LinkedIn outreach) + El Foro (Reddit community) — code + spec + tenant config, pero `enabled: false` (no activan nada hasta tu OK explícito)
 
-**4 cosas chiquitas necesitan tu input** (todas <30 min combinadas). Ver sección "Autorizaciones pendientes" abajo.
+**6 cosas chiquitas necesitan tu input** (todas <30 min combinadas). Ver sección "Autorizaciones pendientes" abajo.
+
+## 📊 SEO score progression (durante la noche)
+
+| Run | Mode | Score | Why |
+|---|---|---|---|
+| v1 | seo_health | UNKNOWN | Bug 1: --permission-mode acceptEdits rechazaba WebFetch |
+| v2 | seo_health | UNKNOWN | Bug 2: --allowed-tools comma-sep arg eating prompt |
+| **v3** | seo_health | **58** | Posicionador fix definitivo: comma-sep tools + `--` separator antes del prompt |
+| **v4** | seo_health | **61 (+3)** | Después de QW1-QW12 quick wins (titles, schema, sticky CTA, lazy-load, etc.) |
+| **v5** | seo_health | **63 (+2)** | Después de Service schema en 6 service pages + post_title rewrites para keyword-rich H1s |
+
+Breakdown del último run: Technical 78 · On-page 62 (+12 from v3) · Local 45 · Content 60 · CWV UNKNOWN.
+
+**Para llegar a 80+ se necesita** (autorizaciones de Jefe):
+- GBP `place_id` provisioned (5 min)
+- PageSpeed Insights API key (CWV detection)
+- SerpAPI key (rank tracking)
+- City × Service landing pages (Posicionador rec: 6 cities × 3 services = 18 pages)
+- 5+ Google Reviews (boost Local score)
+- Real project photos (kills the audit's #1 conversion blocker)
 
 ---
 
@@ -172,6 +193,32 @@ El post entero positionaba a Geo como "Wisconsin custom cabinet maker" — wrong
 
 ---
 
+## 🏗️ TASK 6 — Embajador + Foro skeletons (BONUS, no activados)
+
+Mientras dormías, construí el código + spec de los 2 agentes nuevos:
+
+### El Embajador (LinkedIn B2B outreach)
+- `agents/embajador/SKILL.md` — 100% spec (ICP, nurture sequence, anti-ban defenses, Airtable schema)
+- `agents/embajador/embajador.mjs` — 3 modes: `prepare_batch` / `followup` / `audit_pipeline`
+- **NUNCA auto-posts** — refuses `--activate` flag por design (drafts only)
+- Tenant config block agregado, `enabled: false`
+- Dry-run ya validado en Hostinger — prompt sale clean
+
+### El Foro (Reddit community engagement)
+- `agents/foro/SKILL.md` — 100% spec (5 subreddits con weights, intent keywords, geo modifiers, 10:1 ratio, karma threshold, 5 seed post ideas)
+- `agents/foro/foro.mjs` — 3 modes: `monitor` / `original_post` / `followup`
+- **NUNCA auto-posts** — drafts only, human posts via Reddit web UI
+- `monitor` mode fetches Reddit public JSON API (no auth) y rankea threads
+- Dry-run testeo en Hostinger — Reddit me bloqueó (sin OAuth necesita más trabajo para activar real)
+- Tenant config block agregado, `enabled: false`
+
+**Para activar Embajador o Foro:**
+1. Validamos un manual cycle primero (Jefe envía 3 connection requests, ve si convierten)
+2. Geo Carpentry necesita ≥5 Google reviews + portfolio con fotos reales antes de outreach LinkedIn (sin proof, prospects te miran y se van)
+3. Para Reddit: Jefe necesita cuenta Reddit con 30+ días history + 50+ karma antes de mencionar Geo
+
+Build estimate para activación completa de ambos: 2-3 días más cuando me digas.
+
 ## 📈 Próximos pasos sugeridos (cuando estés despierto)
 
 | Prioridad | Acción | ETA |
@@ -209,10 +256,11 @@ El post entero positionaba a Geo como "Wisconsin custom cabinet maker" — wrong
 
 ## 📊 Métricas Sprint 1 + Sprint 2 (combinadas)
 
-**Tiempo total invertido:** ~5-6 hrs autonomous + cooperative
-**Commits pushados:** 7 (geo-carpentry: 3 / investoros-web: 4)
+**Tiempo total invertido:** ~7 hrs autonomous + cooperative
+**Commits pushados:** 9+ (geo-carpentry: 4 / investoros-web: 5)
 **Issues identificados:** 11 critical visuales + 3 SEO + 3 content alignment
-**Issues resueltos:** 14 de 17 (82%)
+**Issues resueltos:** 15 de 17 (88%)
+**SEO score progression:** UNKNOWN → 58 → 61 → **63** (+5 pts, ~9% mejora)
 **Bloqueadores remanentes:** 0 (todos los pendientes son discrecionales o esperan tu input)
 
 **Para Geo Carpentry:**
