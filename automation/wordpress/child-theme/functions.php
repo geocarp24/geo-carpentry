@@ -585,3 +585,113 @@ add_action('wp_head', function () {
     // Remove Astra's description hook if it exists
     remove_action('wp_head', 'astra_meta_description', 1);
 }, 0);
+/**
+ * Append Service schema markup via child theme hook.
+ * Outputs `schema.org/Service` JSON-LD on each service detail page.
+ * Listed for Google Service rich results + Voice Search ranking.
+ *
+ * This file is appended to the child theme functions.php.
+ */
+
+// Service config — keyed by WP page ID
+if (!defined('GC_SERVICE_SCHEMA_MAP')) {
+    define('GC_SERVICE_SCHEMA_MAP', [
+        2288 => [
+            'name' => 'Kitchen Remodeling',
+            'description' => 'Full and partial kitchen renovations including cabinets, countertops, flooring, lighting, plumbing rough-in. Custom design or contractor-grade options.',
+            'service_type' => 'Kitchen Remodeling',
+            'price_min' => 5000, 'price_max' => 30000,
+        ],
+        2289 => [
+            'name' => 'Bathroom Remodeling',
+            'description' => 'Bathroom remodels including tub-to-shower conversions, full bath gut + remodel, vanity installs, tile work, plumbing. Bilingual team.',
+            'service_type' => 'Bathroom Remodeling',
+            'price_min' => 3000, 'price_max' => 15000,
+        ],
+        2290 => [
+            'name' => 'Deck Building',
+            'description' => 'New deck construction (wood, composite, PVC), repair and re-staining. WI-climate-rated materials. Permit assistance for Brown County.',
+            'service_type' => 'Deck Building',
+            'price_min' => 2000, 'price_max' => 12000,
+        ],
+        2326 => [
+            'name' => 'Finish Carpentry & Trim',
+            'description' => 'Crown molding, baseboards, door and window trim, custom built-ins installation. Detail-focused craftsmen serving Northeast Wisconsin.',
+            'service_type' => 'Finish Carpentry',
+            'price_min' => 500, 'price_max' => 8000,
+        ],
+        2291 => [
+            'name' => 'Home Renovation',
+            'description' => 'Full home updates, kitchen and bath combo projects, flooring, drywall, paint. Project management included from design to completion.',
+            'service_type' => 'Home Renovation',
+            'price_min' => 5000, 'price_max' => 50000,
+        ],
+        2292 => [
+            'name' => 'General Construction & Custom Homes',
+            'description' => 'General construction, home additions, framing, structural work, full custom home builds. Licensed and insured for Wisconsin.',
+            'service_type' => 'General Construction',
+            'price_min' => 3000, 'price_max' => 100000,
+        ],
+    ]);
+}
+
+add_action('wp_head', function () {
+    if (is_admin() || !is_singular('page')) return;
+    $id = (int) get_the_ID();
+    if (!isset(GC_SERVICE_SCHEMA_MAP[$id])) return;
+
+    $svc = GC_SERVICE_SCHEMA_MAP[$id];
+
+    $schema = [
+        '@context' => 'https://schema.org',
+        '@type' => 'Service',
+        '@id' => get_permalink($id) . '#service',
+        'serviceType' => $svc['service_type'],
+        'name' => $svc['name'],
+        'description' => $svc['description'],
+        'provider' => [
+            '@type' => 'GeneralContractor',
+            '@id' => home_url('/#business'),
+            'name' => 'Geo Carpentry LLC',
+            'url' => home_url('/'),
+            'telephone' => '+1-920-367-1272',
+            'address' => [
+                '@type' => 'PostalAddress',
+                'streetAddress' => '735 E Walnut St Suite 3',
+                'addressLocality' => 'Green Bay',
+                'addressRegion' => 'WI',
+                'postalCode' => '54301',
+                'addressCountry' => 'US',
+            ],
+        ],
+        'areaServed' => [
+            ['@type' => 'City', 'name' => 'Green Bay'],
+            ['@type' => 'City', 'name' => 'Howard'],
+            ['@type' => 'City', 'name' => 'De Pere'],
+            ['@type' => 'City', 'name' => 'Allouez'],
+            ['@type' => 'City', 'name' => 'Bellevue'],
+            ['@type' => 'City', 'name' => 'Suamico'],
+            ['@type' => 'City', 'name' => 'Ashwaubenon'],
+            ['@type' => 'City', 'name' => 'Appleton'],
+            ['@type' => 'City', 'name' => 'Oshkosh'],
+            ['@type' => 'City', 'name' => 'Sheboygan'],
+            ['@type' => 'City', 'name' => 'Manitowoc'],
+            ['@type' => 'City', 'name' => 'Fond du Lac'],
+        ],
+        'offers' => [
+            '@type' => 'AggregateOffer',
+            'priceCurrency' => 'USD',
+            'lowPrice' => $svc['price_min'],
+            'highPrice' => $svc['price_max'],
+            'availability' => 'https://schema.org/InStock',
+        ],
+        'hasOfferCatalog' => [
+            '@type' => 'OfferCatalog',
+            'name' => $svc['name'] . ' Services',
+        ],
+    ];
+
+    echo "\n<script type=\"application/ld+json\">"
+        . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+        . "</script>\n";
+}, 5);
