@@ -122,3 +122,62 @@ Built `apps/investoros/src/app/(dashboard)/geo/page.tsx` + 4 components + Airtab
 ---
 
 **Final report:** see `automation/OVERNIGHT_REPORT_2026-05-15.md`
+
+---
+
+### 08:30 — Service schema added on 6 service pages
+
+Posicionador audit recommendation #5 ("install Service schema") applied via child theme `wp_head` hook. Each of 6 service pages now outputs schema.org/Service JSON-LD with provider linked to GeneralContractor, areaServed 12 cities, AggregateOffer with price range. Verified live on /kitchen + /deck.
+
+Snapshot pulled to repo `automation/wordpress/child-theme/functions.php` (commit `f863684`).
+
+### 08:45 — TASK 6 skeletons (Embajador + Foro) built
+
+Two new agents under `agents/` in InvestorOS repo. Both refuse activation by design — drafts only.
+
+- **El Embajador** (`agents/embajador/`) — LinkedIn B2B outreach for B2C aliados (real estate investors, property managers, architects). SKILL.md + embajador.mjs + tenant config block. Modes: prepare_batch / followup / audit_pipeline. Dry-run validated.
+- **El Foro** (`agents/foro/`) — Reddit community engagement for B2C homeowners. SKILL.md + foro.mjs + tenant config block. Monitors r/HomeImprovement / r/Wisconsin / r/GreenBay / r/RealEstate / r/HomeOwners. Modes: monitor / original_post / followup. Dry-run runs but Reddit blocks without OAuth — known limitation for activation.
+
+Commit `cfbd581` pushed to investoros-web.
+
+### 09:00 — post_title rewrites for keyword-rich Astra entry-title H1s
+
+Posicionador v3 detected H1s were still bland ("Home", "About") because Astra renders post_title via entry-title class. Updated post_title for 11 pages → slug preserved.
+
+Now `<h1 class="entry-title">` reads "Carpentry & Remodeling in Green Bay, WI" / "Kitchen Remodeling in Green Bay" / etc. CSS-hidden via earlier polish (sr-only) but indexable by Google bots.
+
+### 09:15 — Posicionador v4: 61/100 (+3 from v3)
+### 09:30 — Posicionador v5: 63/100 (+2 from v4)
+
+After Service schema + post_title rewrites. Cumulative same-session: 58 → 61 → 63 (+5 pts).
+
+Breakdown v5: Technical 78 · On-page 62 (+12 from v3) · Local 45 · Content 60 · CWV UNKNOWN.
+
+### 10:00 — Final smoke test PASSED
+
+All 14 main endpoints verified HTTPS 200:
+- 4 main pages: /, /about/, /services/, /portfolio/, /contact/, /news/
+- 6 service detail pages
+- 2 system endpoints: wp-sitemap.xml, robots.txt
+
+Zero 4xx or 5xx errors. Site is healthy. Overnight session ends.
+
+---
+
+## Final commits (chronological)
+
+```
+geo-carpentry:
+  f863684 — Service schema on 6 service pages
+  039652e — Final overnight report (score progression)
+  (incl 7075c01, dbd59a2 from earlier)
+
+investoros-web:
+  cfbd581 — Embajador + Foro skeletons
+  7ecaa8c — Geo dashboard scaffolded
+  bed66b0 — Tenant config: content_queue + atp_mining + voice_search
+  5937e15 — Tenant alignment: custom carpentry removed
+  2fd0866 — Posicionador --allowed-tools fix
+```
+
+Total commits this session: 9 pushed across both repos.
