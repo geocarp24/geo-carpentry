@@ -1,87 +1,84 @@
-# Geo Carpentry — Cutover Status (2026-05-15 03:45 UTC)
+# Geo Carpentry — Cutover Status (2026-05-15)
 
-## TL;DR
+## Final state (post-overnight Sprint 1 + Sprint 2 quick wins)
 
-- ✅ DNS de `geocarpentry.com` propagó (resuelve a IPs Hostinger + Cloudflare en 8.8.8.8 / 1.1.1.1 / 9.9.9.9).
-- ⚠️ **`https://geocarpentry.com` devuelve HTTP 409** — Cloudflare no puede hablar HTTPS con el origen Hostinger porque el SSL cert para `geocarpentry.com` todavía no está provisionado en Hostinger.
-- ✅ El sitio en sí está sano: `http://156.67.74.243/` con header `Host: geocarpentry.com` devuelve **200 OK**, WP está bien configurado (`siteurl=http://geocarpentry.com`).
-- ✅ Staging `https://blueviolet-gerbil-900105.hostingersite.com` sigue 200.
-- ✅ Lead capture pipeline funcional end-to-end (mu-plugin + Airtable Contacts/Leads).
-- ✅ Form "Quote Request" SureForms creada (ID 2340).
-
-## Bloqueador único — fixes posibles (cualquiera de los 2)
-
-### Opción A — Cambiar Cloudflare a "Flexible SSL" (1 minuto, funciona ya)
-1. Cloudflare dashboard → `geocarpentry.com` → **SSL/TLS** → **Overview**
-2. Encryption mode: cambiar de "Full" / "Full (strict)" a **"Flexible"**
-3. Esperar ~60 segundos
-4. Verificar: `https://geocarpentry.com` → 200
-
-⚠️ Trade-off: Cloudflare ↔ origen va en HTTP plano (cliente ↔ Cloudflare sigue siendo HTTPS). Aceptable como solución temporal hasta que Hostinger emita el cert.
-
-### Opción B — Forzar emisión SSL en Hostinger (10 min)
-1. hPanel → `geocarpentry.com` → **SSL** → "Install SSL"
-2. Esperar emisión Let's Encrypt (~5 min)
-3. Mantener Cloudflare en "Full" / "Full (strict)"
-4. Verificar: `https://geocarpentry.com` → 200
-
-Recomendado: hacer **Opción A** ya para destrabar, después **Opción B** para subir a Full SSL.
-
-## DNS anomalía secundaria
-
-`nslookup geocarpentry.com 8.8.8.8` devuelve **2 IPs**: `156.67.74.243` (Hostinger directo) + `172.66.0.42` (Cloudflare proxy). Suena a que hay registros A duplicados — uno directo y uno proxied. Idealmente:
-- En Cloudflare DNS, dejar **SOLO** un A record proxied (nube naranja) apuntando a `156.67.74.243`.
-- Si hay un A record adicional (DNS-only, nube gris), borrarlo.
-
-Esto evita rutas mixtas donde algunos usuarios pegan al origen directo y otros pasan por Cloudflare.
-
-## Trabajo completado este turno (sin Jefe)
-
-| Tarea | Estado |
+| Layer | Status |
 |---|---|
-| Audit WP estructura (18 pages + 10 posts) | ✅ done |
-| Bug encontrado: `custom-carpentry` slug NO existe → real slug es `finish-carpentry` | ✅ tenant config actualizado |
-| Plugins activos validados (LiteSpeed, SureForms, SureRank, SureMails, Jetpack) | ✅ |
-| Constantes Airtable inyectadas en `wp-config.php` (backup `wp-config.php.bak.geo`) | ✅ |
-| `mu-plugin` `geo-airtable-lead-capture.php` deployado a `/wp-content/mu-plugins/` | ✅ |
-| Pipeline end-to-end probado: form submit → Airtable Contact + Lead | ✅ test record creado y borrado |
-| SureForm "Quote Request" creada (ID 2340) con 7 campos: name/phone/email/service/city/budget/description | ✅ |
-| GitHub Secrets seteados: `ALEX_GOOGLE_EMAIL`, `ALEX_GOOGLE_PASSWORD`, `ALEX_MAILBOX_EMAIL`, `ALEX_MAILBOX_PASSWORD` | ✅ |
+| **DNS (Squarespace)** | ✅ Clean — only `156.67.74.243` resolves, CAA `pki.goog` removed, legacy CloudFront/Durable/cf-custom-hostname records purged |
+| **SSL** | ✅ Let's Encrypt cert installed via Hostinger, valid through 2026-08-13 |
+| **`https://geocarpentry.com`** | ✅ HTTP 200 + cert valid (no browser warnings) |
+| **All 13 main pages HTTPS** | ✅ 200 OK on home, about, services (+6 detail), portfolio, contact, sitemap, robots |
+| **WP siteurl/home** | ✅ `https://geocarpentry.com` |
+| **LiteSpeed cache** | ✅ Active, purged after every edit batch |
+| **Form `/contact/` (SureForm 2340)** | ✅ Button "Get My Free Estimate", 7 fields, Privacy link below, end-to-end tested with real submit → Airtable Lead created → cleaned |
+| **mu-plugin lead capture** | ✅ Active in `/wp-content/mu-plugins/geo-airtable-lead-capture.php`, constants in `wp-config.php` |
+| **Schema markup** | ✅ "EXCELLENT" per Posicionador audit — LocalBusiness `GeneralContractor` w/ 17-city `areaServed`, `OfferCatalog`, `GeoCoordinates` |
+| **Posicionador SEO** | ✅ Baseline run 2026-05-15, score 58/100 in Airtable `SEO_Audits` |
+| **Escriba content engine** | ✅ Setup complete, first plan_week run generated 2 articles in Content_Queue |
+| **InvestorOS Geo dashboard** | ✅ Scaffolded at `apps/investoros/src/app/(dashboard)/geo/` (commit `7ecaa8c`), needs `npm install` + dev server to test locally |
 
-## Pendiente del Jefe
+## What changed during the cutover sprint
 
-| Acción | Tiempo | Cuándo |
+**DNS cleanup (Jefe via Squarespace UI):**
+- Deleted `CAA @ → 0 issue "pki.goog"` (was blocking Let's Encrypt issuance)
+- Deleted 6 legacy records: AWS CloudFront, Durable.co verification, Cloudflare custom-hostname, 2× ACME challenges, unknown subdomain validation
+- Kept: A `@ → 156.67.74.243`, CNAME `www → geocarpentry.com`, 2× Google site verification, Apple domain verification, Squarespace Domain Connect preset, Google Workspace MX (5 records)
+
+**SSL emission:**
+- Cancelled stuck "Installing" cert in hPanel + clicked "Install SSL" again
+- Hostinger emitted Let's Encrypt cert against clean DNS within minutes
+- Verified via `openssl s_client` from server side
+
+**WP content alignment (Jefe correction):**
+Geo Carpentry does NOT make custom cabinets/closets/woodwork/built-in shelving. Removed 7 mentions across:
+- Page 2285 Portfolio (3 replacements)
+- Page 2284 About (1 replacement)
+- Post 2302 Winter Myths (2 replacements)
+- Post 2294 Kitchen Cost (1 replacement)
+- Post 2299 "Custom Cabinets vs Stock" — moved to **draft status** (entire post misaligned, backup in `~/.geo_backups/`)
+- Tenant config keywords + topic_pillars updated
+
+## Outstanding items (need Jefe action)
+
+| Item | Where | Effort |
 |---|---|---|
-| Cloudflare → SSL mode Flexible (Opción A arriba) | 1 min | YA — destraba el sitio |
-| Hostinger → emitir SSL cert para `geocarpentry.com` | 5-10 min | hoy |
-| Aceptar GMB Manager invite cuando llegue (yo lo mando) | 2 min | tras tener acceso GMB |
-| Pasar: `ANTHROPIC_KEY`, `APP_TOKEN`, `DB_NAME/USER/PASS` | 10 min | cuando puedas |
+| Add Cron Job for weekly Posicionador | hPanel → Advanced → Cron Jobs (see authorization section in overnight report) | 2 min |
+| Run OAuth init local for refresh_token | Windows PowerShell (see overnight report) | 5 min |
+| Review 2 Escriba article plans + approve to draft | Airtable Content_Queue | 5 min |
+| Provide 10-15 hi-res project photos | Google Drive link | 30 min |
+| Provide 3-5 named testimonials | Text message | 10 min |
+| Approve form above-the-fold mobile reorder OR keep as-is | Visual decision | 1 min |
 
-## Pendiente de ALEX (sigo trabajando)
+## Rollback runbook (if anything breaks)
 
-- Insertar el shortcode `[sureforms id="2340"]` en la página `/contact/` y/o homepage
-- Verificar el form en frontend (cuando el SSL se arregle)
-- Setup Search Console + Bing Webmaster (necesito access Google)
-- Primer SEO baseline con Posicionador (necesito ANTHROPIC_KEY)
-- Aceptar GMB Manager invite (necesito access Google)
-- Configurar `secrets.ALEX_GOOGLE_*` para integraciones cron de GBP
+**Site goes down:**
+1. hPanel → File Manager → restore from `wp-config.php.bak.geo`
+2. Restore child theme: `cp style.css.bak.20260515 style.css; cp functions.php.bak.20260515 functions.php` (in `/wp-content/themes/geo-carpentry-child/`)
+3. WP-CLI: `wp post-content < ~/.geo_backups/<id>_<timestamp>.txt` for individual pages
 
-## Archivos clave creados/modificados
+**Form breaks:**
+1. WP admin → SureForms → Form 2340 → revert to baseline
+2. Or via WP-CLI: `wp post update 2340 --post_status=draft` to take offline
 
-- `automation/wordpress/mu-plugins/geo-airtable-lead-capture.php` — capturador de leads
-- `automation/SEO_PLAN_CONSOLIDADO.md` — plan vigente
-- `automation/airtable/populate_base.py` — script idempotente de 7 tablas
-- `InvestorOS/agents/tenants/geo-carpentry.json` — tenant config (slug `finish-carpentry` corregido)
+**Cache stale:**
+- `wp litespeed-purge all` on Hostinger SSH (any time)
 
-## Cómo verificar tú mismo (en 30 segundos)
+## URLs for reference
 
-```powershell
-# Origen sano (debería responder 200 OK)
-curl.exe -H "Host: geocarpentry.com" -I http://156.67.74.243/
+- Live site: https://geocarpentry.com
+- Staging (still alive as reference): https://blueviolet-gerbil-900105.hostingersite.com
+- WP admin: https://geocarpentry.com/wp-admin (admin@geocarpentry.com)
+- hPanel: https://hpanel.hostinger.com
+- Airtable Geo CRM: https://airtable.com/appAQpveuAec077jF
+- Squarespace DNS: https://account.squarespace.com/domains/managed/geocarpentry.com/dns/dns-settings
+- Google Cloud Console (OAuth client): https://console.cloud.google.com (project "Claude for Real Estate")
+- Geo dashboard (local dev): `cd InvestorOS/apps/investoros && npm install && npm run dev` → http://localhost:3000/geo
 
-# Staging vivo
-curl.exe -I https://blueviolet-gerbil-900105.hostingersite.com/
+## Backups locations
 
-# Cloudflare problema (devuelve 409 hasta arreglo SSL)
-curl.exe -I https://geocarpentry.com/
-```
+- `~/.geo_backups/` — backups of every WP post/page that was edited (filename: `<id>_<timestamp>.txt`)
+- `~/.geo_backups/<id>_seo_<timestamp>.txt` — pre-SEO-edit backups (SEO titles + H1 batch)
+- `~/.geo_backups/<id>_maps_<timestamp>.txt` — pre-Google Maps embed backup
+- `domains/geocarpentry.com/public_html/wp-content/themes/geo-carpentry-child/style.css.bak.20260515` — pre-polish CSS
+- `domains/geocarpentry.com/public_html/wp-content/themes/geo-carpentry-child/functions.php.bak.20260515` — pre-polish PHP
+- `domains/geocarpentry.com/public_html/wp-config.php.bak.geo` — pre-Airtable-constants config
