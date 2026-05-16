@@ -365,6 +365,9 @@ add_action( 'wp_footer', function () {
 
 /**
  * QW12: Hook IntersectionObserver to fade-in elements on scroll.
+ * PATCHED 2026-05-15: selector restricted to .gc-fade-in only (opt-in).
+ * Previously also targeted .gc-section / .gc-page-intro / .gc-cta-banner
+ * which broke visibility when JS didn't fire. Existing classes are now untouched.
  */
 add_action( 'wp_footer', function () {
     if ( is_admin() ) return;
@@ -372,9 +375,11 @@ add_action( 'wp_footer', function () {
     <script>
     (function () {
         if (!('IntersectionObserver' in window)) return;
+        var targets = document.querySelectorAll('.gc-fade-in');
+        if (!targets.length) return;
         var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (prefersReduced) {
-            document.querySelectorAll('.gc-fade-in, .gc-section, .gc-page-intro, .gc-cta-banner').forEach(function(el){ el.classList.add('is-visible'); });
+            targets.forEach(function (el) { el.classList.add('is-visible'); });
             return;
         }
         var io = new IntersectionObserver(function (entries) {
@@ -385,7 +390,7 @@ add_action( 'wp_footer', function () {
                 }
             });
         }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-        document.querySelectorAll('.gc-fade-in, .gc-section, .gc-page-intro, .gc-cta-banner').forEach(function (el) { io.observe(el); });
+        targets.forEach(function (el) { io.observe(el); });
     })();
     </script>
     <?php
@@ -394,54 +399,57 @@ add_action( 'wp_footer', function () {
 /**
  * QW6: Add aria-label to anchor links that contain only emoji/icon content.
  * Targets WhatsApp + Facebook + Instagram links found on the site.
- * Uses output buffering through wp_head + a content filter — additive only.
+ *
+ * PATCHED 2026-05-15 (CRITICAL): The original regex used variable-width
+ * lookbehind `(?<!aria-label="[^"]*")` which PHP PCRE does NOT support.
+ * preg_replace_callback returned NULL on every page load, blanking the
+ * entire post_content. Now we use simple regex + check inside the callback
+ * with strpos() to avoid duplicates. Also wrapped each replace in a guard
+ * so a single regex failure can never wipe content (returns original).
  */
 add_filter( 'the_content', function ( $content ) {
-    if ( is_admin() ) return $content;
-    // WhatsApp link (wa.me)
-    $content = preg_replace_callback(
-        '#<a([^>]*href="https://wa\.me/[^"]+"[^>]*)(?<!aria-label="[^"]*")>#i',
-        function ( $m ) {
-            if ( strpos( $m[0], 'aria-label' ) !== false ) return $m[0];
-            return '<a' . $m[1] . ' aria-label="Message us on WhatsApp">';
-        },
-        $content
-    );
-    // Facebook
-    $content = preg_replace_callback(
-        '#<a([^>]*href="https?://(?:www\.)?facebook\.com/[^"]+"[^>]*)>#i',
-        function ( $m ) {
-            if ( strpos( $m[0], 'aria-label' ) !== false ) return $m[0];
-            return '<a' . $m[1] . ' aria-label="Visit our Facebook page">';
-        },
-        $content
-    );
-    // Instagram
-    $content = preg_replace_callback(
-        '#<a([^>]*href="https?://(?:www\.)?instagram\.com/[^"]+"[^>]*)>#i',
-        function ( $m ) {
-            if ( strpos( $m[0], 'aria-label' ) !== false ) return $m[0];
-            return '<a' . $m[1] . ' aria-label="Visit our Instagram profile">';
-        },
-        $content
-    );
+    if ( is_admin() || ! is_string( $content ) || $content === '' ) return $content;
+
+    $patterns = [
+        ['#<a([^>]*href="https://wa\.me/[^"]+"[^>]*)>#i',                           'Message us on WhatsApp'],
+        ['#<a([^>]*href="https?://(?:www\.)?facebook\.com/[^"]+"[^>]*)>#i',         'Visit our Facebook page'],
+        ['#<a([^>]*href="https?://(?:www\.)?instagram\.com/[^"]+"[^>]*)>#i',        'Visit our Instagram profile'],
+    ];
+
+    foreach ( $patterns as [$regex, $label] ) {
+        $new = preg_replace_callback(
+            $regex,
+            function ( $m ) use ( $label ) {
+                if ( strpos( $m[0], 'aria-label' ) !== false ) return $m[0];
+                return '<a' . $m[1] . ' aria-label="' . esc_attr( $label ) . '">';
+            },
+            $content
+        );
+        // Critical safety: if preg fails for any reason, KEEP original content.
+        if ( $new !== null ) {
+            $content = $new;
+        }
+    }
+
     return $content;
 }, 20 );
 
 /**
  * QW11: Add loading="lazy" + decoding="async" to images that lack the attributes.
  * Skip the first image on the page (LCP element) to keep LCP fast.
+ *
+ * PATCHED 2026-05-15: added null-safety guard so a regex failure cannot
+ * wipe content (same defensive pattern as the aria-label filter).
  */
 add_filter( 'the_content', function ( $content ) {
-    if ( is_admin() ) return $content;
+    if ( is_admin() || ! is_string( $content ) || $content === '' ) return $content;
     static $first_image_done = false;
-    $content = preg_replace_callback(
+    $new = preg_replace_callback(
         '#<img\s([^>]*)>#i',
         function ( $m ) use ( &$first_image_done ) {
             $attrs = $m[1];
             if ( ! $first_image_done ) {
                 $first_image_done = true;
-                // First image: add fetchpriority high if no loading attribute
                 if ( strpos( $attrs, 'fetchpriority' ) === false ) {
                     $attrs .= ' fetchpriority="high"';
                 }
@@ -460,7 +468,7 @@ add_filter( 'the_content', function ( $content ) {
         },
         $content
     );
-    return $content;
+    return ( $new !== null ) ? $new : $content;
 }, 25 );
 
 /**

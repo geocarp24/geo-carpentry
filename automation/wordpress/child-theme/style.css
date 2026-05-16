@@ -1047,27 +1047,26 @@ button:hover {
     /* don't hide cta on scroll — always visible */
 }
 
-/* ---------- 3) Subtle scroll-fade animation ---------- */
+/* ---------- 3) Subtle scroll-fade animation (OPT-IN ONLY via .gc-fade-in) ----------
+   PATCHED 2026-05-15: previously targeted .gc-section / .gc-page-intro /
+   .gc-cta-banner which broke existing content rendering when the JS
+   IntersectionObserver didn't fire properly. Now scoped strictly to .gc-fade-in
+   — a new class that must be opted into explicitly. Existing classes remain
+   unstyled (visible by default). */
 @media (prefers-reduced-motion: no-preference) {
-    .gc-fade-in,
-    .gc-section,
-    .gc-page-intro,
-    .gc-cta-banner {
+    .gc-fade-in {
         opacity: 0;
         transform: translateY(18px);
         transition: opacity 0.6s ease-out, transform 0.6s ease-out;
         will-change: opacity, transform;
     }
-    .gc-fade-in.is-visible,
-    .gc-section.is-visible,
-    .gc-page-intro.is-visible,
-    .gc-cta-banner.is-visible {
+    .gc-fade-in.is-visible {
         opacity: 1;
         transform: translateY(0);
     }
 }
 @media (prefers-reduced-motion: reduce) {
-    .gc-fade-in, .gc-section, .gc-page-intro, .gc-cta-banner {
+    .gc-fade-in {
         opacity: 1;
         transform: none;
     }
