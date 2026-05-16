@@ -472,6 +472,39 @@ add_filter( 'the_content', function ( $content ) {
 }, 25 );
 
 /**
+ * QW13: Swap service emojis for high-quality project images in Service Cards.
+ * Refactored to only target emojis that appear as standalone icons (wrapped in certain tags)
+ * to prevent breaking inline text flow as identified in code review.
+ */
+add_filter( 'the_content', function ( $content ) {
+    if ( is_admin() || ! is_string( $content ) || $content === '' ) return $content;
+
+    $replacements = [
+        '🍳' => 'kitchen.jpg',
+        '🏗️' => 'full renovation.png',
+        '🪵' => 'decks.png',
+        '🚿' => 'basement.jpg',
+        '🔨' => 'new construction.png',
+    ];
+
+    foreach ( $replacements as $emoji => $img_name ) {
+        $img_url = get_stylesheet_directory_uri() . '/' . $img_name;
+
+        // Pattern: look for the emoji when it's the ONLY content of a tag or starts a block
+        // This targets the service cards where emojis were used as icons.
+        $pattern = '/(<div[^>]*>|<p[^>]*>|>)\s*' . preg_quote($emoji, '/') . '\s*(<\/div>|<\/p>|<)/u';
+
+        $html = '$1<div class="gc-service-image-wrapper" style="margin-bottom:20px; overflow:hidden; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.1);">'
+              . '<img src="' . esc_url( $img_url ) . '" alt="Geo Carpentry Real Project" class="gc-service-img" style="width:100%; height:220px; object-fit:cover; display:block; transition:transform 0.5s ease;">'
+              . '</div>$2';
+
+        $content = preg_replace($pattern, $html, $content);
+    }
+
+    return $content;
+}, 5 );
+
+/**
  * QW9: Inject Jorge Cruz author byline at the top of every blog post.
  * Only applies to single posts (not pages), only if not already present.
  */
@@ -701,5 +734,104 @@ add_action('wp_head', function () {
 
     echo "\n<script type=\"application/ld+json\">"
         . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+        . "</script>\n";
+}, 5);
+
+/**
+ * Inject FAQPage schema for Voice Search optimization.
+ * Helps Google Assistant and Alexa answer specific questions.
+ *
+ * NOTE FOR ADMIN: To update these questions, edit the $faqs array below.
+ * In a future update, these can be linked to a WordPress Custom Field or
+ * a dedicated FAQ plugin to avoid editing PHP code.
+ */
+add_action('wp_head', function () {
+    if (!is_page('faq')) return;
+
+    $faqs = [
+        [
+            'q' => 'Do you provide free estimates for carpentry projects in Green Bay?',
+            'a' => 'Yes, Geo Carpentry LLC provides free, no-obligation estimates for all carpentry and remodeling projects in Green Bay and the surrounding Northeast Wisconsin area. We usually respond within 24 hours.'
+        ],
+        [
+            'q' => 'Is Geo Carpentry licensed and insured in Wisconsin?',
+            'a' => 'Yes, we are a fully licensed and insured General Contractor in the state of Wisconsin. We prioritize safety and quality on every job site.'
+        ],
+        [
+            'q' => 'What services does Geo Carpentry offer?',
+            'a' => 'We specialize in kitchen and bathroom remodeling, custom deck building, finish carpentry, trim installation, and general home renovations.'
+        ],
+        [
+            'q' => 'Do you speak Spanish?',
+            'a' => 'Yes, Jorge Cruz and our team are fully bilingual in English and Spanish (Hablamos Español), ensuring clear communication with all our clients.'
+        ]
+    ];
+
+    $schema = [
+        '@context' => 'https://schema.org',
+        '@type' => 'FAQPage',
+        'mainEntity' => array_map(function($faq) {
+            return [
+                '@type' => 'Question',
+                'name' => $faq['q'],
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text' => $faq['a']
+                ]
+            ];
+        }, $faqs)
+    ];
+
+    echo "\n<script type=\"application/ld+json\">"
+        . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        . "</script>\n";
+}, 5);
+
+/**
+ * Inject BreadcrumbList schema for better site structure understanding.
+ * Helps with Voice Search ("Navigate to...") and rich results.
+ */
+add_action('wp_head', function () {
+    if (is_front_page() || is_admin()) return;
+
+    $items = [
+        [
+            '@type' => 'ListItem',
+            'position' => 1,
+            'name' => 'Home',
+            'item' => home_url('/')
+        ]
+    ];
+
+    if (is_page()) {
+        $items[] = [
+            '@type' => 'ListItem',
+            'position' => 2,
+            'name' => get_the_title(),
+            'item' => get_permalink()
+        ];
+    } elseif (is_single()) {
+        $items[] = [
+            '@type' => 'ListItem',
+            'position' => 2,
+            'name' => 'News',
+            'item' => home_url('/news/')
+        ];
+        $items[] = [
+            '@type' => 'ListItem',
+            'position' => 3,
+            'name' => get_the_title(),
+            'item' => get_permalink()
+        ];
+    }
+
+    $schema = [
+        '@context' => 'https://schema.org',
+        '@type' => 'BreadcrumbList',
+        'itemListElement' => $items
+    ];
+
+    echo "\n<script type=\"application/ld+json\">"
+        . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         . "</script>\n";
 }, 5);
