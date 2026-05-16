@@ -1248,3 +1248,28 @@ textarea:focus-visible,
     left: 8px;
     top: 8px;
 }
+
+/* ---------- 8) Global Page Branding (Standard Pages) ---------- */
+.page:not(.home) .entry-header {
+    background: linear-gradient(135deg, var(--gc-navy) 0%, var(--gc-navy-light) 100%);
+    padding: 60px 20px;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.page:not(.home) .entry-title {
+    color: var(--gc-white) !important;
+    font-family: var(--gc-font-headline);
+    font-size: clamp(32px, 5vw, 48px);
+    margin: 0;
+    position: static !important; /* Undo the sr-only fix for standard pages */
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    clip: auto !important;
+    white-space: normal !important;
+}
+
+.page:not(.home) .ast-container {
+    padding-top: 0;
+}

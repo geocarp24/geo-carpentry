@@ -69,6 +69,7 @@ add_action( 'wp_head', function () {
             'latitude' => 44.5133,
             'longitude'=> -88.0133,
         ],
+        'hasMap'      => 'https://www.google.com/maps?cid=1234567890123456789', // Placeholder CID
         'areaServed'  => array_map( function ( $city ) {
             return [ '@type' => 'City', 'name' => $city, 'addressRegion' => 'WI' ];
         }, [
@@ -815,6 +816,24 @@ add_action('wp_head', function () {
         . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         . "</script>\n";
 }, 5);
+
+/**
+ * Automatically assign the "Custom Service Master" template to service pages.
+ * This ensures the high-conversion design propagates to all service IDs
+ * defined in GC_SERVICE_SCHEMA_MAP without manual assignment.
+ */
+add_filter( 'template_include', function ( $template ) {
+    if ( is_singular( 'page' ) && defined( 'GC_SERVICE_SCHEMA_MAP' ) ) {
+        $id = (int) get_the_ID();
+        if ( isset( GC_SERVICE_SCHEMA_MAP[ $id ] ) ) {
+            $new_template = get_stylesheet_directory() . '/page-service-template.php';
+            if ( file_exists( $new_template ) ) {
+                return $new_template;
+            }
+        }
+    }
+    return $template;
+}, 99 );
 
 /**
  * Inject BreadcrumbList schema for better site structure understanding.
