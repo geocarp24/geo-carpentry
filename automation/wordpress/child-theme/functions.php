@@ -642,12 +642,20 @@ if (!defined('GC_SERVICE_SCHEMA_MAP')) {
             'description' => 'Full and partial kitchen renovations including cabinets, countertops, flooring, lighting, plumbing rough-in. Custom design or contractor-grade options.',
             'service_type' => 'Kitchen Remodeling',
             'price_min' => 5000, 'price_max' => 30000,
+            'faqs' => [
+                ['q' => 'How much does a kitchen remodel cost in Green Bay?', 'a' => 'Average kitchen remodels in Green Bay range from $5,000 for minor updates to $30,000+ for full transformations.'],
+                ['q' => 'How long does a kitchen renovation take?', 'a' => 'Most kitchen projects are completed within 2 to 4 weeks depending on the scope and material availability.'],
+            ]
         ],
         2289 => [
             'name' => 'Bathroom Remodeling',
             'description' => 'Bathroom remodels including tub-to-shower conversions, full bath gut + remodel, vanity installs, tile work, plumbing. Bilingual team.',
             'service_type' => 'Bathroom Remodeling',
             'price_min' => 3000, 'price_max' => 15000,
+            'faqs' => [
+                ['q' => 'Can you convert my tub into a walk-in shower?', 'a' => 'Yes, tub-to-shower conversions are one of our specialties. We handle all plumbing and tile work.'],
+                ['q' => 'What is the best tile for a bathroom floor?', 'a' => 'We recommend porcelain or ceramic tile for its durability and moisture resistance in Wisconsin climates.'],
+            ]
         ],
         2290 => [
             'name' => 'Deck Building',
@@ -735,6 +743,27 @@ add_action('wp_head', function () {
     echo "\n<script type=\"application/ld+json\">"
         . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
         . "</script>\n";
+
+    // Inject FAQ schema for the service if available
+    if (isset($svc['faqs'])) {
+        $faq_schema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => array_map(function($faq) {
+                return [
+                    '@type' => 'Question',
+                    'name' => $faq['q'],
+                    'acceptedAnswer' => [
+                        '@type' => 'Answer',
+                        'text' => $faq['a']
+                    ]
+                ];
+            }, $svc['faqs'])
+        ];
+        echo "\n<script type=\"application/ld+json\">"
+            . wp_json_encode($faq_schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            . "</script>\n";
+    }
 }, 5);
 
 /**
