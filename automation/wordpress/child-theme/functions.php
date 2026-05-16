@@ -49,7 +49,7 @@ add_action( 'wp_head', function () {
         '@type'       => 'GeneralContractor',
         '@id'         => home_url( '/#business' ),
         'name'        => 'Geo Carpentry LLC',
-        'description' => 'Licensed carpentry and construction company serving Green Bay and Northeast Wisconsin since 2014. Custom carpentry, kitchen and bathroom remodeling, deck building, home renovation, and general construction.',
+        'description' => 'Licensed general contractor serving Green Bay and Northeast Wisconsin since 2014. Kitchen and bathroom remodeling, deck building, home renovation, finish carpentry, additions, and custom home builds. Bilingual EN/ES.',
         'url'         => home_url( '/' ),
         'telephone'   => '+1-920-367-1272',
         'email'       => 'admin@geocarpentry.com',
@@ -140,9 +140,9 @@ add_action( 'astra_footer', function () {
           <div class="gc-footer-tagline">Built to Last. Crafted with Pride.</div>
           <p>Licensed carpentry and construction company serving Green Bay and Northeast Wisconsin since 2014. Quality craftsmanship, honest pricing, exceptional results.</p>
           <div class="gc-footer-social">
-            <a href="https://www.facebook.com/profile.php?id=61578160947198" target="_blank" rel="noopener" class="gc-social-btn" title="Facebook">f</a>
-            <a href="https://www.instagram.com/geocarpentryllc2026" target="_blank" rel="noopener" class="gc-social-btn" title="Instagram">ig</a>
-            <a href="https://wa.me/19209340351" target="_blank" rel="noopener" class="gc-social-btn" title="WhatsApp">wa</a>
+            <a href="https://www.facebook.com/profile.php?id=61578160947198" target="_blank" rel="noopener" class="gc-social-btn" aria-label="Visit Geo Carpentry on Facebook" title="Facebook"><span aria-hidden="true">f</span></a>
+            <a href="https://www.instagram.com/geocarpentryllc2026" target="_blank" rel="noopener" class="gc-social-btn" aria-label="Visit Geo Carpentry on Instagram" title="Instagram"><span aria-hidden="true">ig</span></a>
+            <a href="https://wa.me/19209340351" target="_blank" rel="noopener" class="gc-social-btn" aria-label="Message Geo Carpentry on WhatsApp" title="WhatsApp"><span aria-hidden="true">wa</span></a>
           </div>
         </div>
 
@@ -701,5 +701,118 @@ add_action('wp_head', function () {
 
     echo "\n<script type=\"application/ld+json\">"
         . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+        . "</script>\n";
+}, 5);
+
+/**
+ * FAQPage schema — voice search + AI Overviews + rich results.
+ * Only injected on the /faq/ page (gated by slug or page ID).
+ *
+ * To update questions: edit the $faqs array below.
+ * NOTE: keep questions HTML-encoded and answers prose-safe; the JSON encoder
+ * handles escaping. No user-supplied input flows through here — no XSS risk.
+ *
+ * Privacy: never reference license #, insurance carrier, or any private info.
+ */
+add_action('wp_head', function () {
+    if (is_admin()) return;
+    if (!is_page('faq')) return;
+
+    $faqs = [
+        [
+            'q' => 'Do you provide free estimates in Green Bay and Northeast Wisconsin?',
+            'a' => 'Yes. Geo Carpentry LLC provides free, no-obligation estimates for kitchen remodels, bathroom remodels, deck builds, home renovations, and general construction across Green Bay and Northeast Wisconsin. Typical response within 24 hours.',
+        ],
+        [
+            'q' => 'Is Geo Carpentry licensed and insured?',
+            'a' => 'Yes. Geo Carpentry LLC is a fully licensed general contractor and is insured in the state of Wisconsin. License and insurance documents are provided directly to clients after contracts are signed.',
+        ],
+        [
+            'q' => 'What services does Geo Carpentry offer?',
+            'a' => 'Kitchen remodeling, bathroom remodeling, deck building, home renovations, finish carpentry, framing, additions, and custom home construction. We are a full-service general contractor serving residential homeowners.',
+        ],
+        [
+            'q' => 'Does your team speak Spanish?',
+            'a' => 'Yes. Jorge Cruz and the Geo Carpentry crew are fully bilingual in English and Spanish. Hablamos español — clear communication in your preferred language on every project.',
+        ],
+        [
+            'q' => 'What areas do you serve?',
+            'a' => 'We serve Green Bay, Howard, De Pere, Allouez, Ashwaubenon, Suamico, Pulaski, Appleton, Oshkosh, Sheboygan, Manitowoc, Fond du Lac, and surrounding Northeast Wisconsin communities — generally within a 100-mile radius of Green Bay.',
+        ],
+    ];
+
+    $schema = [
+        '@context' => 'https://schema.org',
+        '@type' => 'FAQPage',
+        'mainEntity' => array_map(function ($faq) {
+            return [
+                '@type' => 'Question',
+                'name' => $faq['q'],
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text' => $faq['a'],
+                ],
+            ];
+        }, $faqs),
+    ];
+
+    echo "\n<script type=\"application/ld+json\">"
+        . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        . "</script>\n";
+}, 5);
+
+/**
+ * BreadcrumbList schema — rich results + voice search "Navigate to..." queries.
+ * Injected on every non-home page. Two-level breadcrumb (Home > Current Page) for
+ * top-level pages; three-level (Home > News > Post) for single blog posts.
+ *
+ * Safe by design: only reads WP core data (get_the_title, get_permalink, home_url).
+ * No user-supplied input flows through.
+ */
+add_action('wp_head', function () {
+    if (is_admin() || is_front_page() || is_home()) return;
+
+    $items = [
+        [
+            '@type' => 'ListItem',
+            'position' => 1,
+            'name' => 'Home',
+            'item' => home_url('/'),
+        ],
+    ];
+
+    if (is_page()) {
+        $items[] = [
+            '@type' => 'ListItem',
+            'position' => 2,
+            'name' => get_the_title(),
+            'item' => get_permalink(),
+        ];
+    } elseif (is_single()) {
+        $items[] = [
+            '@type' => 'ListItem',
+            'position' => 2,
+            'name' => 'News',
+            'item' => home_url('/news/'),
+        ];
+        $items[] = [
+            '@type' => 'ListItem',
+            'position' => 3,
+            'name' => get_the_title(),
+            'item' => get_permalink(),
+        ];
+    } else {
+        // Archive, search, 404, etc. — keep simple home-only breadcrumb
+        return;
+    }
+
+    $schema = [
+        '@context' => 'https://schema.org',
+        '@type' => 'BreadcrumbList',
+        'itemListElement' => $items,
+    ];
+
+    echo "\n<script type=\"application/ld+json\">"
+        . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         . "</script>\n";
 }, 5);
