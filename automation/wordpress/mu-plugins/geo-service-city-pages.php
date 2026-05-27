@@ -95,7 +95,13 @@ class Geo_Service_City_Pages {
             ],
         ] );
 
-        if ( empty( $pages ) ) return;
+        if ( empty( $pages ) ) {
+            // Our query vars matched but no page exists yet. Force a clean 404
+            // instead of letting WP fall through to a fuzzy random-post match.
+            $query->set_404();
+            status_header( 404 );
+            return;
+        }
 
         $page_id = (int) $pages[0];
 
