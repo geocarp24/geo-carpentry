@@ -71,8 +71,16 @@ CITIES = {
 }
 
 
-def fetch_ready_records():
-    """Query Airtable Content_Queue for rows ready_to_publish."""
+def fetch_records(status_filter="ready_to_publish"):
+    """Query Airtable Content_Queue for rows matching status filter.
+
+    Cowork writes records with status='draft' initially. Once Jorge + Claude Code
+    review the sample, status is bumped to 'ready_to_publish' and bulk creator
+    publishes those as WP draft pages.
+
+    Pass status_filter='draft' to dry-run against Cowork's freshly-generated
+    batch before promotion.
+    """
     token = os.environ.get("AIRTABLE_TOKEN_GEO")
     if not token:
         sys.exit("ERROR: AIRTABLE_TOKEN_GEO env var not set")
@@ -81,7 +89,7 @@ def fetch_ready_records():
         f"AND("
         f"{{tenant_id}}='{TENANT_ID}',"
         f"{{content_type}}='{CONTENT_TYPE}',"
-        f"{{status}}='ready_to_publish'"
+        f"{{status}}='{status_filter}'"
         f")"
     )
     params = urlencode({"filterByFormula": formula, "pageSize": 100})
@@ -90,6 +98,11 @@ def fetch_ready_records():
     with urlopen(req, timeout=30) as resp:
         data = json.loads(resp.read())
     return data.get("records", [])
+
+
+# Back-compat alias for the original name
+def fetch_ready_records():
+    return fetch_records("ready_to_publish")
 
 
 def update_record_status(record_id, new_status, page_id=None):
@@ -139,25 +152,57 @@ def markdown_to_html_basic(md):
     return "\n\n".join(paragraphs)
 
 
+def _parse_slug(combined_slug):
+    """Cowork stores combined path in `slug` field: e.g. 'kitchen-remodeling/green-bay-wi'.
+    Parse into (service_slug, city_slug) using whitelists.
+
+    Returns (service_slug, city_slug) or (None, None) if can't parse.
+    """
+    if not combined_slug:
+        return None, None
+    # Format: {service-slug}/{city-slug}-wi
+    parts = combined_slug.strip("/").split("/")
+    if len(parts) != 2:
+        return None, None
+    svc, city_with_suffix = parts
+    # Strip "-wi" suffix from city
+    city = city_with_suffix.rsplit("-wi", 1)[0] if city_with_suffix.endswith("-wi") else city_with_suffix
+    return svc, city
+
+
 def build_wp_cli_create_cmd(row, dry_run=False):
     """Build the wp post create + wp post meta update commands for one record."""
     fields = row["fields"]
     record_id = row["id"]
 
-    # Required fields
+    # Required fields — Cowork populates these per geo-carpentry-theme-bank.json spec
     title = fields.get("title", "").strip()
-    service_slug = fields.get("service_slug") or _infer_service_slug(fields)
-    city_slug = fields.get("city_slug") or fields.get("slug", "").replace("-wi", "")
     body_md = fields.get("body_md", "")
     target_keyword = fields.get("target_keyword", "")
     meta_description = fields.get("meta_description", "")
     schema_jsonld = fields.get("schema_jsonld", "")
-    faq_jsonld = fields.get("faq_jsonld", "")
-    internal_links = fields.get("internal_links", "")
-    cta_primary = fields.get("cta_primary", "Get My Free Estimate")
+
+    # Cowork stores combined path in `slug` field (e.g. "kitchen-remodeling/green-bay-wi"),
+    # NOT as separate service_slug + city_slug fields. Parse it.
+    service_slug, city_slug = _parse_slug(fields.get("slug", ""))
+    if not service_slug or not city_slug:
+        # Fallback to source_idea_id if slug parsing fails
+        # Format: "{service_slug}_{city_slug}" e.g. "kitchen-remodeling_green-bay"
+        source_id = fields.get("source_idea_id", "")
+        if source_id and "_" in source_id:
+            parts = source_id.split("_", 1)
+            if len(parts) == 2:
+                service_slug, city_slug = parts
+
+    # Cowork uses `suggested_internal_links` (not `internal_links`)
+    internal_links = fields.get("suggested_internal_links", "")
+
+    # These fields don't exist in Cowork's current Content_Queue schema — derived/optional
+    faq_jsonld = ""  # Could parse from body_md or schema_jsonld FAQPage section later
+    cta_primary = f"Get My Free {service_slug.replace('-', ' ').title()} Estimate" if service_slug else "Get My Free Estimate"
 
     if not title or not service_slug or not city_slug:
-        return None, f"SKIP {record_id}: missing title/service/city"
+        return None, f"SKIP {record_id}: missing title/service/city (slug='{fields.get('slug', '')}')"
 
     if service_slug not in SERVICES:
         return None, f"SKIP {record_id}: unknown service_slug '{service_slug}'"
@@ -240,12 +285,17 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="Preview, don't create")
     parser.add_argument("--limit", type=int, default=None, help="Max pages to create (for testing)")
-    parser.add_argument("--output-script", default=None, help="Write WP-CLI commands to a .sh file instead of executing")
+    parser.add_argument("--output-script", default=None, help="Write WP-CLI commands to a .sh file")
+    parser.add_argument(
+        "--status",
+        default="ready_to_publish",
+        help="Filter Content_Queue by status (default: ready_to_publish; use 'draft' to preview Cowork's batch before promotion)",
+    )
     args = parser.parse_args()
 
-    print(f"[{datetime.utcnow().isoformat()}Z] Fetching Content_Queue from Airtable...")
-    records = fetch_ready_records()
-    print(f"Found {len(records)} ready_to_publish records.")
+    print(f"[{datetime.utcnow().isoformat()}Z] Fetching Content_Queue (status='{args.status}')...")
+    records = fetch_records(args.status)
+    print(f"Found {len(records)} records.")
 
     if args.limit:
         records = records[:args.limit]
