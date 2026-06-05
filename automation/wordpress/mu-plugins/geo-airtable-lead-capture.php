@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Geo Carpentry — Airtable Lead Capture
  * Description: Forwards web form submissions (SureForms, WPCode popup, generic AJAX) to the Geo_Leads Airtable table + Telegram + email.
- * Version:     2.0.0
+ * Version:     2.0.1
  * Author:      ALEX / InvestorOS
  *
  * 2026-06-04 v2 rewrite. Changes from v1:
@@ -51,7 +51,11 @@ function geo_http_request($method, $url, $headers = [], $body = null, $timeout =
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 6);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+    // Hostinger Premium ships outdated CA bundles — verifypeer=true causes
+    // outbound to api.telegram.org to fail silently (Airtable sometimes passes
+    // because its cert chain is in older bundles). Documented hosting quirk.
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
     if ($headers) {
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     }
@@ -113,27 +117,55 @@ function geo_detect_language($lead) {
  * ──────────────────────────────────────────────────────────────────────────── */
 
 function geo_normalize_submission($form_data, $form_id = 0, $source_hint = 'Website Form') {
-    $get = function($keys, $default = '') use ($form_data) {
+    // First-pass: get a field whose KEY contains $needle but does NOT contain any $exclude.
+    // Avoids "Email Address" matching the address getter (the bug we fixed in v2.0.1).
+    $get = function($keys, $excludes = [], $default = '') use ($form_data) {
         foreach ((array)$keys as $k) {
             foreach ($form_data as $fk => $fv) {
-                if (stripos($fk, $k) !== false && !empty($fv)) {
-                    return is_array($fv) ? implode(', ', $fv) : trim((string)$fv);
+                if (empty($fv)) { continue; }
+                if (stripos($fk, $k) === false) { continue; }
+                $skip = false;
+                foreach ((array)$excludes as $ex) {
+                    if (stripos($fk, $ex) !== false) { $skip = true; break; }
                 }
+                if ($skip) { continue; }
+                return is_array($fv) ? implode(', ', $fv) : trim((string)$fv);
             }
         }
         return $default;
     };
 
+    // SureForms 2.x typically exposes separate first-name + last-name; combine them.
+    $first = $get(['first-name', 'first_name', 'firstname', 'fname', 'nombre']);
+    $last  = $get(['last-name', 'last_name', 'lastname', 'lname', 'apellido']);
+    $full  = trim($first . ' ' . $last);
+    if ($full === '') {
+        $full = $get(['full-name', 'fullname', 'your-name'], ['first', 'last']);
+        if ($full === '') {
+            // Generic "name" only as last resort — many forms call other things "name" too.
+            $full = $get(['name'], ['first', 'last', 'user', 'company']);
+        }
+    }
+
+    // Address: combine "Address Line 1" + "Line 2" if present, else single address field.
+    $addr1 = $get(['address-line-1', 'address_line_1', 'street', 'direccion'], ['email']);
+    $addr2 = $get(['address-line-2', 'address_line_2'], ['email']);
+    $address = trim($addr1 . ($addr2 ? ', ' . $addr2 : ''));
+    if ($address === '') {
+        $address = $get(['address'], ['email']);
+    }
+
     return [
-        'name'        => $get(['name', 'full-name', 'fullname', 'nombre']),
+        'name'        => $full,
         'email'       => $get(['email', 'correo', 'e-mail']),
         'phone'       => $get(['phone', 'tel', 'telefono', 'telephone', 'mobile', 'celular']),
-        'service'     => $get(['service', 'servicio', 'project-type', 'project_type', 'tipo']),
-        'city'        => $get(['city', 'ciudad', 'location', 'ubicacion']),
-        'address'     => $get(['address', 'direccion', 'street']),
-        'budget'      => $get(['budget', 'presupuesto', 'price-range']),
-        'timeline'    => $get(['timeline', 'when', 'cuando']),
-        'description' => $get(['message', 'description', 'descripcion', 'project', 'proyecto', 'textarea', 'details', 'comments']),
+        'service'     => $get(['service', 'servicio', 'project-type', 'project_type', 'tipo'], ['country']),
+        'city'        => $get(['city', 'ciudad'], ['email']) ?: $get(['location', 'ubicacion'], ['email']),
+        'state'       => $get(['state', 'estado'], ['real']),
+        'address'     => $address,
+        'budget'      => $get(['budget', 'presupuesto', 'price-range', 'approximate-budget']),
+        'timeline'    => $get(['timeline', 'when-do-you-want-to-start', 'when', 'cuando']),
+        'description' => $get(['message', 'description', 'descripcion', 'project', 'proyecto', 'textarea', 'details', 'comments', 'tell-us', 'about-your-project']),
         'subject'     => $get(['subject', 'asunto']),
         'form_id'     => $form_id,
         'source'      => $source_hint,
@@ -163,12 +195,19 @@ function geo_airtable_create_geolead($lead) {
     $notes_intro = '[' . current_time('Y-m-d H:i') . '] Web form submission';
     $notes = $notes_intro . ($notes_parts ? "\n" . implode(' · ', $notes_parts) : '');
 
+    // Build Home Address: combine street + city + state when separate fields exist.
+    $addr_parts = [];
+    if (!empty($lead['address'])) { $addr_parts[] = $lead['address']; }
+    if (!empty($lead['city']))    { $addr_parts[] = $lead['city']; }
+    if (!empty($lead['state']))   { $addr_parts[] = $lead['state']; }
+    $home_address = implode(', ', $addr_parts);
+
     $fields = [
         'Full Name'           => $lead['name']    ?: ('Web lead ' . current_time('Y-m-d')),
         'Phone'               => $lead['phone']   ?: '',
         'Service Type'        => geo_map_service_type($lead['service']),
         'City'                => $lead['city']    ?: '',
-        'Home Address'        => $lead['address'] ?: '',
+        'Home Address'        => $home_address,
         'Project Description' => $description,
         'Notes'               => $notes,
         'Language'            => geo_detect_language($lead),
