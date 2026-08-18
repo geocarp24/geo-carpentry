@@ -1,0 +1,22 @@
+# Secretos y configuración local
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Dependencias, registros y compilaciones
+node_modules/
+dist/
+.manus-logs/
+*.log
+
+# Archivos de trabajo y medios privados
+uploads/
+media/
+originals/
+*.heic
+*.mov
+*.mp4

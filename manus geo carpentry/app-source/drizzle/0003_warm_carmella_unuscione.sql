@@ -1,0 +1,1 @@
+ALTER TABLE `media_imports` ADD `origin` enum('Carga web','Recuperación temporal') DEFAULT 'Carga web' NOT NULL;

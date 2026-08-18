@@ -1,0 +1,24 @@
+# Project TODO
+
+- [x] Revisar el estado actual del proyecto compartido.
+- [x] Registrar y aplicar la solicitud de respaldo inicial indicada por el usuario.
+- [x] Verificar el respaldo local de medios de Geo Carpentry sin modificar originales.
+- [x] Preparar un inventario del primer lote apto para carga segura.
+- [x] Registrar los hallazgos y el siguiente paso de carga en la aplicación.
+- [x] Respaldar y verificar los 16 originales únicos identificados en la carpeta 201902_a.
+- [x] Habilitar y retirar un canal temporal autenticado para transferir el lote inicial desde el equipo local.
+- [x] Inventariar los medios restantes y separar duplicados, archivos auxiliares y videos que superan el límite de carga.
+- [x] Documentar para el siguiente operador el respaldo pendiente de medios compatibles, sin modificar los originales locales.
+- [x] Documentar para el siguiente operador la clasificación asistida pendiente de las imágenes en las categorías acordadas.
+- [x] Documentar para el siguiente operador la revisión de distribución de categorías y los elementos que requieren revisión humana.
+- [x] Retirar cualquier acceso temporal utilizado durante la transferencia masiva.
+- [x] Habilitar un canal temporal autenticado para transferir en lotes los medios restantes desde el equipo local.
+- [x] Reanudar la transferencia desde el lote fotográfico pendiente, sin repetir los 96 respaldos verificados.
+- [x] Detener cualquier transferencia temporal en curso y retirar su canal autenticado antes del handoff.
+- [x] Auditar el estado real de medios, clasificación, importaciones, conexiones y cambios de código; sin registros en `media_imports`.
+- [x] Redactar un handoff completo con secretos, tokens y credenciales protegidos.
+- [x] Preparar el handoff y el estado de código para guardar el punto de control de entrega.
+- [ ] Preparar un paquete seguro de código, manuales, inventarios, notas y handoff para GitHub.
+- [ ] Excluir secretos, tokens, registros sensibles, dependencias generadas y archivos internos no transferibles.
+- [ ] Crear la carpeta `manus geo carpentry` en el repositorio seleccionado y verificar su contenido.
+- [ ] Subir el paquete de continuidad al repositorio GitHub seleccionado.

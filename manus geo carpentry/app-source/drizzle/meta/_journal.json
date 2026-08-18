@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1786915360769,
+      "tag": "0000_lazy_shinobi_shaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1786915759308,
+      "tag": "0001_rapid_stick",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786921417002,
+      "tag": "0002_regular_longshot",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1786921743052,
+      "tag": "0003_warm_carmella_unuscione",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1786922956636,
+      "tag": "0004_pink_gamma_corps",
+      "breakpoints": true
+    }
+  ]
+}
