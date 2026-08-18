@@ -134,8 +134,8 @@ function isBranded(q) {
  * See memoria.md section 1.
  */
 const OUT_OF_SCOPE = [
-  /commercial/i,
-  /industrial/i,
+  /commercial/i,
+  /industrial/i,
   /custom cabinet/i,
   /cabinet (maker|shop|making)/i,
 ];
@@ -221,18 +221,27 @@ function classify(queryRows, queryPageRows, urls) {
 
 /* --------------------------------------------------------------------- Claude call */
 
-function runClaude(prompt) {
+// Same invocation shape as posicionador: prompt as a positional argument after
+// `--`, stdin closed. Passing it on stdin makes the CLI exit 1 with no stderr.
+function runClaude(prompt, timeoutMs = 15 * 60 * 1000) {
   return new Promise((resolve, reject) => {
     const child = spawn(cfg.claude.binary_path, [
       "--print",
-      "--allowed-tools", "WebSearch,WebFetch,Read,Grep,Glob",
-    ], { stdio: ["pipe", "pipe", "pipe"] });
+      "--permission-mode", "acceptEdits",
+      "--allowed-tools", "WebFetch,WebSearch,Read,Grep,Glob",
+      "--",
+      prompt,
+    ], { stdio: ["ignore", "pipe", "pipe"] });
     let out = "", err = "";
+    const timer = setTimeout(() => { child.kill("SIGKILL"); reject(new Error("timeout")); }, timeoutMs);
     child.stdout.on("data", (d) => (out += d));
     child.stderr.on("data", (d) => (err += d));
-    child.on("close", (code) => (code === 0 ? resolve(out) : reject(new Error(`claude exit ${code}: ${err.slice(0, 400)}`))));
-    child.stdin.write(prompt);
-    child.stdin.end();
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      if (code !== 0) return reject(new Error(`claude exit ${code}: ${err.slice(0, 500)}`));
+      resolve(out);
+    });
+    child.on("error", (e) => { clearTimeout(timer); reject(e); });
   });
 }
 
