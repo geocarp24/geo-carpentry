@@ -1,0 +1,22 @@
+# SSH keys — NUNCA subir al repo
+vps_key
+*.pem
+*.key
+id_rsa
+id_ed25519
+
+# Variables de entorno con tokens reales
+.env
+.env.local
+.env*.local
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos temporales
+*.tmp
+*.bak
+*.swp
+~$*

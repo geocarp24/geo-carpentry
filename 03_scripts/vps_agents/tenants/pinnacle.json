@@ -1,0 +1,36 @@
+{
+  "tenant_id": "pinnacle",
+  "tenant_name": "Pinnacle Holdings Group LLC",
+  "website": "https://pinnacleholdingsgroup.com",
+  "claude": {
+    "binary_path": "/usr/local/bin/claude"
+  },
+  "airtable": {
+    "base_id": "appAQpveuAec077jF",
+    "token_env": "AIRTABLE_TOKEN_PINNACLE",
+    "table_id": "tblpiN42pK3YFxGEW",
+    "content_queue_table_id": "tblpiN42pK3YFxGEW",
+    "decisions_log_table_id": "tbluHpgWlVNqSveVi"
+  },
+  "social": {
+    "fb_page_id": "965320503341457",
+    "ig_account_id": "",
+    "fb_page_token_env": "META_PAGE_ACCESS_TOKEN_PINNACLE",
+    "meta_user_token_env": "META_USER_TOKEN_PINNACLE"
+  },
+  "persona_file": "tenants/pinnacle_persona.md",
+  "telegram": {
+    "bot_token_env": "TELEGRAM_BOT_TOKEN",
+    "chat_id_env": "TELEGRAM_CHAT_ID"
+  },
+  "business": {
+    "name": "Pinnacle Holdings Group LLC",
+    "phone": "",
+    "city": "Green Bay",
+    "state": "WI",
+    "languages": [
+      "en",
+      "es"
+    ]
+  }
+}

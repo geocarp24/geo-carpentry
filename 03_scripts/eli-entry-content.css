@@ -1,0 +1,209 @@
+/* ============================================================
+   Geo Carpentry — Entry Content Styles for Eli (Escriba) pages
+   Paste in: WP Admin → Appearance → Customize → Additional CSS
+   Tested with: Astra (Free) + Elementor Free 4.x
+   ============================================================ */
+
+/* ── Base content container ─────────────────────────────── */
+.single .entry-content,
+.page .entry-content {
+  font-size: 1.0625rem;        /* 17px — easy reading on desktop */
+  line-height: 1.78;
+  color: #2d2d2d;
+  max-width: 820px;
+}
+
+/* ── Headings ─────────────────────────────────────────────── */
+.entry-content h1 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--e-global-color-primary, #1a2e44);
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.entry-content h2 {
+  font-size: clamp(1.35rem, 3vw, 1.875rem);
+  font-weight: 700;
+  color: var(--e-global-color-primary, #1a2e44);
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 3px solid var(--e-global-color-accent, #e07b2a);
+  display: inline-block;
+}
+
+.entry-content h3 {
+  font-size: clamp(1.1rem, 2.5vw, 1.375rem);
+  font-weight: 600;
+  color: var(--e-global-color-primary, #1a2e44);
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.entry-content h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--e-global-color-primary, #1a2e44);
+  margin-top: 1.5rem;
+  margin-bottom: 0.35rem;
+}
+
+/* ── Paragraphs ──────────────────────────────────────────── */
+.entry-content p {
+  margin-bottom: 1.25rem;
+}
+
+/* ── Lists ───────────────────────────────────────────────── */
+.entry-content ul,
+.entry-content ol {
+  margin: 0.75rem 0 1.25rem 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.entry-content ul li,
+.entry-content ol li {
+  position: relative;
+  padding-left: 1.75rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.65;
+}
+
+/* Checkmark bullets for ul */
+.entry-content ul li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 0.05em;
+  color: var(--e-global-color-accent, #e07b2a);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+/* Numbered bullets for ol */
+.entry-content ol {
+  counter-reset: geo-list;
+}
+.entry-content ol li {
+  counter-increment: geo-list;
+}
+.entry-content ol li::before {
+  content: counter(geo-list);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.35rem;
+  height: 1.35rem;
+  background: var(--e-global-color-accent, #e07b2a);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  margin-top: 0.15em;
+}
+
+/* ── FAQ block — h4 + following paragraph ────────────────── */
+.entry-content h4 + p {
+  background: #f7f8fa;
+  border-left: 4px solid var(--e-global-color-accent, #e07b2a);
+  padding: 0.85rem 1.1rem;
+  margin-top: -0.2rem;
+  margin-bottom: 1.5rem;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.97rem;
+  line-height: 1.7;
+}
+
+/* ── Blockquote (testimonials / callout text) ─────────────── */
+.entry-content blockquote {
+  border-left: 5px solid var(--e-global-color-accent, #e07b2a);
+  background: #fff8f2;
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: #444;
+}
+.entry-content blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── CTA box — last <p> or <p> containing phone/email link ── */
+.entry-content p:last-of-type,
+.entry-content .geo-cta {
+  background: var(--e-global-color-primary, #1a2e44);
+  color: #fff;
+  padding: 1.25rem 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 500;
+  margin-top: 2.5rem;
+}
+.entry-content p:last-of-type a,
+.entry-content .geo-cta a {
+  color: var(--e-global-color-accent, #f0943a);
+  text-decoration: none;
+  font-weight: 700;
+}
+.entry-content p:last-of-type a:hover,
+.entry-content .geo-cta a:hover {
+  text-decoration: underline;
+}
+
+/* ── Strong / bold ───────────────────────────────────────── */
+.entry-content strong {
+  font-weight: 700;
+  color: inherit;
+}
+
+/* ── Price / cost table (if any) ─────────────────────────── */
+.entry-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.97rem;
+}
+.entry-content table th {
+  background: var(--e-global-color-primary, #1a2e44);
+  color: #fff;
+  padding: 0.65rem 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+.entry-content table td {
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid #e8e8e8;
+}
+.entry-content table tr:nth-child(even) td {
+  background: #f7f8fa;
+}
+
+/* ── Horizontal rule ─────────────────────────────────────── */
+.entry-content hr {
+  border: none;
+  border-top: 2px solid var(--e-global-color-accent, #e07b2a);
+  opacity: 0.3;
+  margin: 2rem 0;
+}
+
+/* ── Mobile tweaks ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  .single .entry-content,
+  .page .entry-content {
+    font-size: 1rem;
+  }
+  .entry-content h2 {
+    font-size: 1.3rem;
+    display: block;
+  }
+  .entry-content p:last-of-type {
+    padding: 1rem;
+  }
+}

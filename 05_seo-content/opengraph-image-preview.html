@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InvestorOS OG Image Preview – /es/ pages</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #111827;
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      padding: 40px 24px 80px;
+      color: #e2e8f0;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.5px;
+    }
+    header p {
+      margin-top: 8px;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-bottom: 60px;
+    }
+    .section-label {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      color: #475569;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      padding-left: 4px;
+    }
+
+    /* OG card wrapper – scales 1200×630 to fit viewport */
+    .og-wrapper {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      aspect-ratio: 1200 / 630;
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+    }
+
+    /* ── Base card styles ── */
+    .og-card {
+      width: 100%;
+      height: 100%;
+      background: #0f172a;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* Grid dots background */
+    .og-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(99,102,241,0.14) 1.5px, transparent 1.5px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    /* Left accent bar */
+    .accent-bar {
+      position: absolute;
+      left: 0; top: 0;
+      width: 6px; height: 100%;
+    }
+
+    /* Bottom accent line */
+    .bottom-line {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    /* Radial glow */
+    .glow {
+      position: absolute;
+      top: -15%;
+      right: -10%;
+      width: 42%;
+      padding-bottom: 42%;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    /* Top row */
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6.5% 8% 0 8%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 5%;
+      min-width: 32px;
+      aspect-ratio: 1;
+      border-radius: 22%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5vw;
+    }
+    .logo-text {
+      font-size: 2.2vw;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.03em;
+    }
+
+    .badge {
+      border-radius: 100px;
+      padding: 0.5% 1.5%;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1.5px solid;
+    }
+    .badge-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .badge-text {
+      font-size: 1.1vw;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+    }
+
+    /* Middle content */
+    .middle {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 8%;
+      position: relative;
+      z-index: 1;
+    }
+    .og-title {
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+    }
+    .og-subtitle {
+      margin-top: 2.5%;
+      font-size: 1.8vw;
+      font-weight: 400;
+      color: #94a3b8;
+    }
+
+    /* Bottom row */
+    .bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8% 6.5% 8%;
+      position: relative;
+      z-index: 1;
+    }
+    .tagline-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tagline-dash {
+      width: 24px; height: 2px;
+      flex-shrink: 0;
+    }
+    .tagline-text {
+      font-size: 1.2vw;
+      font-weight: 500;
+      color: #64748b;
+    }
+    .domain-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .domain-text {
+      font-size: 1.5vw;
+      font-weight: 600;
+      color: #475569;
+    }
+    .domain-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+
+    /* ── Per-category color themes ── */
+
+    /* A – Software (#6366f1) */
+    .cat-software .accent-bar      { background: linear-gradient(180deg, #6366f1 0%, rgba(99,102,241,.35) 100%); }
+    .cat-software .bottom-line     { background: linear-gradient(90deg, #6366f1 0%, transparent 60%); }
+    .cat-software .glow            { background: radial-gradient(circle, rgba(99,102,241,.22) 0%, transparent 70%); }
+    .cat-software .logo-icon       { background: #6366f1; }
+    .cat-software .badge           { background: rgba(99,102,241,.13); border-color: rgba(99,102,241,.45); }
+    .cat-software .badge-dot       { background: #6366f1; }
+    .cat-software .badge-text      { color: #6366f1; }
+    .cat-software .tagline-dash    { background: #6366f1; }
+    .cat-software .domain-dot      { background: #6366f1; }
+
+    /* B – Estado (#10b981) */
+    .cat-estado .accent-bar        { background: linear-gradient(180deg, #10b981 0%, rgba(16,185,129,.35) 100%); }
+    .cat-estado .bottom-line       { background: linear-gradient(90deg, #10b981 0%, transparent 60%); }
+    .cat-estado .glow              { background: radial-gradient(circle, rgba(16,185,129,.22) 0%, transparent 70%); }
+    .cat-estado .logo-icon         { background: #10b981; }
+    .cat-estado .badge             { background: rgba(16,185,129,.13); border-color: rgba(16,185,129,.45); }
+    .cat-estado .badge-dot         { background: #10b981; }
+    .cat-estado .badge-text        { color: #10b981; }
+    .cat-estado .tagline-dash      { background: #10b981; }
+    .cat-estado .domain-dot        { background: #10b981; }
+
+    /* C – Servicio (#f59e0b) */
+    .cat-servicio .accent-bar      { background: linear-gradient(180deg, #f59e0b 0%, rgba(245,158,11,.35) 100%); }
+    .cat-servicio .bottom-line     { background: linear-gradient(90deg, #f59e0b 0%, transparent 60%); }
+    .cat-servicio .glow            { background: radial-gradient(circle, rgba(245,158,11,.22) 0%, transparent 70%); }
+    .cat-servicio .logo-icon       { background: #f59e0b; }
+    .cat-servicio .badge           { background: rgba(245,158,11,.13); border-color: rgba(245,158,11,.45); }
+    .cat-servicio .badge-dot       { background: #f59e0b; }
+    .cat-servicio .badge-text      { color: #f59e0b; }
+    .cat-servicio .tagline-dash    { background: #f59e0b; }
+    .cat-servicio .domain-dot      { background: #f59e0b; }
+
+    /* D – Marketing (#ec4899) */
+    .cat-marketing .accent-bar     { background: linear-gradient(180deg, #ec4899 0%, rgba(236,72,153,.35) 100%); }
+    .cat-marketing .bottom-line    { background: linear-gradient(90deg, #ec4899 0%, transparent 60%); }
+    .cat-marketing .glow           { background: radial-gradient(circle, rgba(236,72,153,.22) 0%, transparent 70%); }
+    .cat-marketing .logo-icon      { background: #ec4899; }
+    .cat-marketing .badge          { background: rgba(236,72,153,.13); border-color: rgba(236,72,153,.45); }
+    .cat-marketing .badge-dot      { background: #ec4899; }
+    .cat-marketing .badge-text     { color: #ec4899; }
+    .cat-marketing .tagline-dash   { background: #ec4899; }
+    .cat-marketing .domain-dot     { background: #ec4899; }
+
+    /* ── Individual title font sizes ── */
+    .title-lg  { font-size: 5.2vw; }   /* short titles ≤30 chars */
+    .title-md  { font-size: 4.5vw; }   /* 31–40 chars */
+    .title-sm  { font-size: 3.8vw; }   /* 41+ chars */
+
+    /* ── All 30 slug cards grid ── */
+    .grid-section {
+      margin-top: 80px;
+    }
+    .grid-section h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 24px;
+      padding-left: 4px;
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+    }
+    .cards-grid .og-wrapper {
+      max-width: 100%;
+    }
+    .slug-label {
+      font-size: 11px;
+      color: #475569;
+      margin-bottom: 6px;
+      padding-left: 2px;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>InvestorOS – OG Image Variants</h1>
+  <p>Visual preview of all 4 category templates · 1200 × 630 px · investoros.tech/es/[slug]</p>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECTION 1 – Category showcases (one representative per category)
+═══════════════════════════════════════════════════════════════ -->
+
+<!-- ── Category A: Software / Automatización ── -->
+<div class="section">
+  <div class="section-label">Categoría A — Software &amp; Automatización (indigo #6366f1) — 18 páginas</div>
+  <div class="og-wrapper">
+    <div class="og-card cat-software">
+      <div class="accent-bar"></div>
+      <div class="bottom-line"></div>
+      <div class="glow"></div>
+
+      <div class="top-row">
+        <div class="logo">
+          <div class="logo-icon">⚡</div>
+          <span class="logo-text">InvestorOS</span>
+        </div>
+        <div class="badge">
+          <div class="badge-dot"></div>
+          <span class="badge-text">AUTOMATIZACIÓN</span>
+        </div>
+      </div>
+
+      <div class="middle">
+        <div class="og-title title-md">CRM para Contratistas Latinos</div>
+        <div class="og-subtitle">Automatización para Contratistas Latinos</div>
+      </div>
+
+      <div class="bottom-row">
+        <div class="tagline-group">
+          <div class="tagline-dash"></div>
+          <span class="tagline-text">Software &amp; Automatización</span>
+        </div>
+        <div class="domain-group">
+          <span class="domain-text">investoros.tech</span>
+          <div class="domain-dot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Category B: Estado ── -->
+<div class="section">
+  <div class="section-label">Categoría B — Por Estado (emerald #10b981) — 4 páginas</div>
+  <div class="og-wrapper">
+    <div class="og-card cat-estado">
+      <div class="accent-bar"></div>
+      <div class="bottom-line"></div>
+      <div class="glow"></div>
+
+      <div class="top-row">
+        <div class="logo">
+          <div class="logo-icon">📍</div>
+          <span class="logo-text">InvestorOS</span>
+        </div>
+        <div class="badge">
+          <div class="badge-dot"></div>
+          <span class="badge-text">POR ESTADO</span>
+        </div>
+      </div>
+
+      <div class="middle">
+        <div class="og-title title-md">Software para Contratistas en Texas</div>
+        <div class="og-subtitle">Automatización para Contratistas Latinos</div>
+      </div>
+
+      <div class="bottom-row">
+        <div class="tagline-group">
+          <div class="tagline-dash"></div>
+          <span class="tagline-text">Cobertura por Estado</span>
+        </div>
+        <div class="domain-group">
+          <span class="domain-text">investoros.tech</span>
+          <div class="domain-dot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Category C: Servicio Específico ── -->
+<div class="section">
+  <div class="section-label">Categoría C — Servicio Específico (amber #f59e0b) — 5 páginas</div>
+  <div class="og-wrapper">
+    <div class="og-card cat-servicio">
+      <div class="accent-bar"></div>
+      <div class="bottom-line"></div>
+      <div class="glow"></div>
+
+      <div class="top-row">
+        <div class="logo">
+          <div class="logo-icon">🔨</div>
+          <span class="logo-text">InvestorOS</span>
+        </div>
+        <div class="badge">
+          <div class="badge-dot"></div>
+          <span class="badge-text">SERVICIO ESPECÍFICO</span>
+        </div>
+      </div>
+
+      <div class="middle">
+        <div class="og-title title-md">Software para Carpintería y Acabados</div>
+        <div class="og-subtitle">Automatización para Contratistas Latinos</div>
+      </div>
+
+      <div class="bottom-row">
+        <div class="tagline-group">
+          <div class="tagline-dash"></div>
+          <span class="tagline-text">Servicio Especializado</span>
+        </div>
+        <div class="domain-group">
+          <span class="domain-text">investoros.tech</span>
+          <div class="domain-dot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Category D: Marketing / Redes ── -->
+<div class="section">
+  <div class="section-label">Categoría D — Marketing &amp; Reputación (pink #ec4899) — 3 páginas</div>
+  <div class="og-wrapper">
+    <div class="og-card cat-marketing">
+      <div class="accent-bar"></div>
+      <div class="bottom-line"></div>
+      <div class="glow"></div>
+
+      <div class="top-row">
+        <div class="logo">
+          <div class="logo-icon">📣</div>
+          <span class="logo-text">InvestorOS</span>
+        </div>
+        <div class="badge">
+          <div class="badge-dot"></div>
+          <span class="badge-text">MARKETING</span>
+        </div>
+      </div>
+
+      <div class="middle">
+        <div class="og-title title-lg">Gestión de Reseñas Google</div>
+        <div class="og-subtitle">Automatización para Contratistas Latinos</div>
+      </div>
+
+      <div class="bottom-row">
+        <div class="tagline-group">
+          <div class="tagline-dash"></div>
+          <span class="tagline-text">Marketing &amp; Reputación</span>
+        </div>
+        <div class="domain-group">
+          <span class="domain-text">investoros.tech</span>
+          <div class="domain-dot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECTION 2 – All 30 slugs in mini grid
+═══════════════════════════════════════════════════════════════ -->
+<div class="grid-section">
+  <h2>Todos los 30 slugs</h2>
+  <div class="cards-grid" id="all-cards"></div>
+</div>
+
+<script>
+  // Slug → { title, category }
+  const PAGES = [
+    // Category A – Software
+    { slug: "software-para-contratistas-generales",                 title: "Software para Contratistas Generales",          cat: "software" },
+    { slug: "automatizacion-de-negocios-de-construccion",           title: "Automatización de Negocios de Construcción",    cat: "software" },
+    { slug: "crm-para-contratistas-latinos",                        title: "CRM para Contratistas Latinos",                 cat: "software" },
+    { slug: "responder-leads-automaticamente-construccion",         title: "Responder Leads Automáticamente",               cat: "software" },
+    { slug: "agentes-de-ia-para-negocios-de-construccion",         title: "Agentes de IA para Construcción",               cat: "software" },
+    { slug: "automatizar-seguimiento-de-clientes-contratistas",    title: "Automatizar Seguimiento de Clientes",            cat: "software" },
+    { slug: "herramientas-digitales-para-contratistas-hispanos",   title: "Herramientas para Contratistas Hispanos",        cat: "software" },
+    { slug: "crm-para-negocios-de-remodelacion",                   title: "CRM para Negocios de Remodelación",             cat: "software" },
+    { slug: "responder-mensajes-de-clientes-automaticamente",      title: "Responder Mensajes Automáticamente",             cat: "software" },
+    { slug: "plataforma-saas-para-negocios-de-construccion-latinos", title: "Plataforma SaaS para Latinos",                 cat: "software" },
+    { slug: "lead-management-para-contratistas-generales",         title: "Lead Management para Contratistas",             cat: "software" },
+    { slug: "notificaciones-automaticas-para-clientes-de-construccion", title: "Notificaciones Automáticas",               cat: "software" },
+    { slug: "seguimiento-de-proyectos-de-remodelacion",            title: "Seguimiento de Proyectos",                      cat: "software" },
+    { slug: "sistema-de-citas-para-contratistas-generales",        title: "Sistema de Citas para Contratistas",            cat: "software" },
+    { slug: "comunicacion-con-clientes-para-constructores",        title: "Comunicación con Clientes",                     cat: "software" },
+    { slug: "herramientas-de-negocio-para-contratistas-pequenos",  title: "Herramientas para Pequeños Negocios",           cat: "software" },
+    { slug: "digitalizar-un-negocio-de-construccion",              title: "Digitalizar tu Negocio de Construcción",        cat: "software" },
+    { slug: "como-conseguir-mas-clientes-como-contratista",        title: "Cómo Conseguir Más Clientes",                   cat: "software" },
+    // Category B – Estado
+    { slug: "software-para-contratistas-en-texas",                 title: "Software para Contratistas en Texas",           cat: "estado" },
+    { slug: "software-para-contratistas-en-california",            title: "Software para Contratistas en California",      cat: "estado" },
+    { slug: "software-para-contratistas-en-florida",               title: "Software para Contratistas en Florida",         cat: "estado" },
+    { slug: "software-para-constructores-en-wisconsin",            title: "Software para Constructores en Wisconsin",      cat: "estado" },
+    // Category C – Servicio
+    { slug: "software-para-remodelacion-de-banos",                 title: "Software para Remodelación de Baños",           cat: "servicio" },
+    { slug: "software-para-remodelacion-de-cocinas",               title: "Software para Remodelación de Cocinas",         cat: "servicio" },
+    { slug: "gestion-de-clientes-para-carpinteros",                title: "Gestión de Clientes para Carpinteros",          cat: "servicio" },
+    { slug: "software-para-carpinteria-y-acabados",                title: "Software para Carpintería y Acabados",          cat: "servicio" },
+    { slug: "software-para-presupuestos-de-construccion",          title: "Software para Presupuestos",                    cat: "servicio" },
+    // Category D – Marketing
+    { slug: "automatizar-publicaciones-en-redes-sociales-contratista", title: "Automatizar Redes Sociales",               cat: "marketing" },
+    { slug: "gestion-de-resenas-google-para-contratistas",         title: "Gestión de Reseñas Google",                    cat: "marketing" },
+    { slug: "automatizacion-de-marketing-para-contratistas",       title: "Automatización de Marketing",                  cat: "marketing" },
+  ];
+
+  const CAT_META = {
+    software:  { accent: "#6366f1", badge: "AUTOMATIZACIÓN",     icon: "⚡", tagline: "Software & Automatización" },
+    estado:    { accent: "#10b981", badge: "POR ESTADO",         icon: "📍", tagline: "Cobertura por Estado" },
+    servicio:  { accent: "#f59e0b", badge: "SERVICIO ESPECÍFICO", icon: "🔨", tagline: "Servicio Especializado" },
+    marketing: { accent: "#ec4899", badge: "MARKETING",          icon: "📣", tagline: "Marketing & Reputación" },
+  };
+
+  function hex2rgba(hex, alpha) {
+    const r = parseInt(hex.slice(1,3),16);
+    const g = parseInt(hex.slice(3,5),16);
+    const b = parseInt(hex.slice(5,7),16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  function titleSize(title) {
+    if (title.length <= 30) return "title-lg";
+    if (title.length <= 40) return "title-md";
+    return "title-sm";
+  }
+
+  const grid = document.getElementById("all-cards");
+
+  PAGES.forEach(({ slug, title, cat }) => {
+    const m = CAT_META[cat];
+    const a = m.accent;
+
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = `<div class="slug-label">/es/${slug}</div>`;
+
+    const ogWrap = document.createElement("div");
+    ogWrap.className = "og-wrapper";
+
+    ogWrap.innerHTML = `
+      <div class="og-card cat-${cat}">
+        <div class="accent-bar"></div>
+        <div class="bottom-line"></div>
+        <div class="glow"></div>
+        <div class="top-row">
+          <div class="logo">
+            <div class="logo-icon">${m.icon}</div>
+            <span class="logo-text">InvestorOS</span>
+          </div>
+          <div class="badge">
+            <div class="badge-dot"></div>
+            <span class="badge-text">${m.badge}</span>
+          </div>
+        </div>
+        <div class="middle">
+          <div class="og-title ${titleSize(title)}">${title}</div>
+          <div class="og-subtitle">Automatización para Contratistas Latinos</div>
+        </div>
+        <div class="bottom-row">
+          <div class="tagline-group">
+            <div class="tagline-dash"></div>
+            <span class="tagline-text">${m.tagline}</span>
+          </div>
+          <div class="domain-group">
+            <span class="domain-text">investoros.tech</span>
+            <div class="domain-dot"></div>
+          </div>
+        </div>
+      </div>`;
+
+    wrapper.appendChild(ogWrap);
+    grid.appendChild(wrapper);
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,122 @@
+{
+  "tenant_id": "geo-carpentry",
+  "tenant_name": "Geo Carpentry LLC",
+  "website": "https://geocarpentry.com",
+  "industry": "home-services",
+  "claude": {
+    "binary_path": "/usr/local/bin/claude"
+  },
+  "airtable": {
+    "base_id": "appAQpveuAec077jF",
+    "token_env": "AIRTABLE_TOKEN_GEO",
+    "table_id": "tblpiN42pK3YFxGEW",
+    "content_queue_table_id": "tblpiN42pK3YFxGEW",
+    "decisions_log_table_id": "tbluHpgWlVNqSveVi",
+    "seo_table_id": "tbl53FPGfpa4OtafX",
+    "marketing_table_id": "tbld7LtJzeN5QTHPo",
+    "leads_table_id": "tblaH41HWeVG9ZXLn",
+    "lead_scores_table_id": "tblaH41HWeVG9ZXLn",
+    "ads_table_id": "tbld7LtJzeN5QTHPo",
+    "scraping_results_table_id": "tblz1qVWHJZFjQzqX",
+    "contacts_table_id": "tbldetnRGCnmHDgFw",
+    "jobs_table_id": "tblRlPhcwiGP7J8LS"
+  },
+  "output": {
+    "airtable_base_id": "appAQpveuAec077jF",
+    "airtable_table_id": "tblz1qVWHJZFjQzqX"
+  },
+  "social": {
+    "fb_page_id": "723873447473999",
+    "ig_account_id": "",
+    "fb_page_token_env": "META_PAGE_ACCESS_TOKEN_GEO",
+    "meta_user_token_env": "META_USER_TOKEN_GEO"
+  },
+  "persona_file": "tenants/geo-carpentry_persona.md",
+  "telegram": {
+    "bot_token_env": "TELEGRAM_BOT_TOKEN",
+    "chat_id_env": "TELEGRAM_CHAT_ID"
+  },
+  "business": {
+    "name": "Geo Carpentry LLC",
+    "phone": "(920) 367-1272",
+    "city": "Green Bay",
+    "state": "WI",
+    "languages": ["en", "es"]
+  },
+  "brand": {
+    "phone": "(920) 367-1272",
+    "address": "735 E Walnut St Suite 3, Green Bay, WI 54301",
+    "email": "admin@geocarpentry.com"
+  },
+  "markets": [
+    {
+      "state": "WI",
+      "cities_primary": ["Green Bay", "Appleton", "Oshkosh", "De Pere", "Howard"],
+      "cities_secondary": ["Allouez", "Bellevue", "Suamico", "Ashwaubenon", "Sheboygan", "Manitowoc", "Fond du Lac", "Wausau"]
+    }
+  ],
+  "regional_scope": {
+    "state": "WI",
+    "primary_city": "Green Bay",
+    "radius_miles": 60
+  },
+  "competitors": [
+    { "name": "Bellin Construction", "url": "https://bellinconstruction.com" },
+    { "name": "Midwest Remodeling Group", "url": "https://midwestremodeling.com" },
+    { "name": "Fox Valley Remodeling", "url": "https://foxvalleyremodeling.com" }
+  ],
+  "search_engines": ["google", "bing", "ai-overviews", "chatgpt-search", "perplexity"],
+  "seo_goals": {
+    "per_page_target_rank": 3,
+    "primary_priority": "NE Wisconsin local SEO — Green Bay, Appleton, Oshkosh",
+    "secondary_priority": "Wisconsin statewide contractor rankings"
+  },
+  "content_goals": {
+    "topic_pillars": [
+      "Kitchen Remodeling",
+      "Bathroom Remodeling",
+      "Deck Building",
+      "Finish Carpentry",
+      "Home Renovation",
+      "General Construction"
+    ],
+    "tone": "professional and approachable",
+    "target_word_count_min": 900,
+    "target_word_count_max": 1800,
+    "languages": ["en", "es"],
+    "articles_per_week": 3,
+    "content_types": [
+      { "type": "service-page", "weight": 0.4 },
+      { "type": "blog-post", "weight": 0.4 },
+      { "type": "faq", "weight": 0.2 }
+    ],
+    "atp_mining": {
+      "seed_queries": [
+        "kitchen remodeling Green Bay WI",
+        "bathroom renovation cost Wisconsin",
+        "deck builder near me Green Bay",
+        "finish carpentry contractor Appleton",
+        "home renovation contractor northeastern Wisconsin",
+        "general contractor Green Bay WI"
+      ]
+    }
+  },
+  "skills": {
+    "seo_deep": ["seo-audit"],
+    "quick_health": ["seo-audit"],
+    "deep_audit": ["seo-audit"],
+    "content_brief": ["content-strategy"],
+    "atp_mining": ["content-strategy"]
+  },
+  "alert_thresholds": {
+    "critical_score": 45,
+    "warn_score": 65
+  },
+  "scraping_enabled": true,
+  "deduplication": {
+    "lookback_days": 90
+  },
+  "compliance": {
+    "rate_limit_seconds": 10
+  }
+}

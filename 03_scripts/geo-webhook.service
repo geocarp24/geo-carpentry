@@ -1,0 +1,30 @@
+[Unit]
+Description=InvestorOS Geo Webhook Service
+Documentation=https://investoros.tech
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/geo-webhook
+ExecStart=/usr/bin/node /opt/geo-webhook/index.mjs
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=geo-webhook
+
+# Environment — EDITAR con valores reales antes de deploy
+Environment=PORT=3001
+Environment=ALEX_BOT_PATH=/opt/alex-bot
+Environment=LOG_FILE=/var/log/geo-webhook.log
+# WEBHOOK_SECRET debe venir del mismo valor configurado en Vercel
+EnvironmentFile=-/opt/geo-webhook/.env
+
+# Seguridad
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

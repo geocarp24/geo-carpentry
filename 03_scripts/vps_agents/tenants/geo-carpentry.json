@@ -1,0 +1,37 @@
+{
+  "tenant_id": "geo-carpentry",
+  "tenant_name": "Geo Carpentry LLC",
+  "website": "https://geocarpentry.com",
+  "claude": {
+    "binary_path": "/usr/local/bin/claude"
+  },
+  "airtable": {
+    "base_id": "appAQpveuAec077jF",
+    "token_env": "AIRTABLE_TOKEN_GEO",
+    "table_id": "tblpiN42pK3YFxGEW",
+    "content_queue_table_id": "tblpiN42pK3YFxGEW",
+    "decisions_log_table_id": "tbluHpgWlVNqSveVi",
+    "seo_table_id": "tbl53FPGfpa4OtafX"
+  },
+  "social": {
+    "fb_page_id": "61578160947198",
+    "ig_account_id": "",
+    "fb_page_token_env": "META_PAGE_ACCESS_TOKEN_GEO",
+    "meta_user_token_env": "META_USER_TOKEN_GEO"
+  },
+  "persona_file": "tenants/geo-carpentry_persona.md",
+  "telegram": {
+    "bot_token_env": "TELEGRAM_BOT_TOKEN",
+    "chat_id_env": "TELEGRAM_CHAT_ID"
+  },
+  "business": {
+    "name": "Geo Carpentry LLC",
+    "phone": "(920) 777-9886",
+    "city": "Green Bay",
+    "state": "WI",
+    "languages": [
+      "en",
+      "es"
+    ]
+  }
+}
