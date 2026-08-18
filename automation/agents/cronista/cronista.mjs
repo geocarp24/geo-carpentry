@@ -207,11 +207,13 @@ function classify(queryRows, queryPageRows, urls) {
     // publish a rival.
     const built = existingTargetPage(q, urls);
     if (built) {
-      improve.push({ query: q, impressions: r.impressions, position: r.position, clicks: r.clicks, page: built });
+      improve.push({ query: q, impressions: r.impressions, position: r.position, clicks: r.clicks,
+        page: built, ranking: owner ? owner.page : null });
       continue;
     }
     if (owner && r.position <= ALREADY_RANKING) {
-      improve.push({ query: q, impressions: r.impressions, position: r.position, clicks: r.clicks, page: owner.page });
+      improve.push({ query: q, impressions: r.impressions, position: r.position, clicks: r.clicks,
+        page: owner.page, ranking: owner.page });
     } else {
       create.push({ query: q, impressions: r.impressions, position: r.position, page: owner ? owner.page : null });
     }
@@ -343,6 +345,10 @@ Page: ${p.page}
 Over the last 90 days Search Console shows it drawing these queries, all stuck off page one:
 ${lines}
 
+${p.rows.some((r) => r.ranking && r.ranking !== p.page)
+  ? `Important: for at least one of these queries Google currently shows a different URL of the same site (${p.rows.find((r) => r.ranking && r.ranking !== p.page).ranking}), not this page. Say what would make Google prefer this page instead, and whether it is even worth trying.`
+  : ""}
+
 Fetch that page and say what specifically to change so it can reach page one for these queries.
 
 Rules:
@@ -388,7 +394,9 @@ log(`\n--- MEJORAR paginas existentes (${improve.length}) ---`);
 log(`Esto vale mas que escribir nuevo: ya hay pagina y ya rankea.\n`);
 for (const r of improve.slice(0, 12)) {
   log(`  ${String(r.impressions).padStart(4)} impr · pos ${r.position.toFixed(1).padStart(5)} · ${r.query}`);
-  log(`       -> ${r.page.replace("https://geocarpentry.com", "")}`);
+  const mismatch = r.ranking && r.ranking !== r.page
+    ? "  (Google muestra " + r.ranking.replace("https://geocarpentry.com", "") + ")" : "";
+  log(`       -> ${r.page.replace("https://geocarpentry.com", "")}${mismatch}`);
 }
 
 const known = await existingKeywords();
