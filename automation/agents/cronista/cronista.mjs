@@ -134,8 +134,10 @@ function isBranded(q) {
  * See memoria.md section 1.
  */
 const OUT_OF_SCOPE = [
-  /commercial/i,
-  /industrial/i,
+  // Commercial construction IS in scope. Jorge corrected this on 2026-08-18;
+  // memoria.md had it wrong and the error was suppressing real queries like
+  // 'commercial carpentry contractors green bay' (16 impressions, position 20).
+  /industrial/i,   // still unconfirmed, ask before claiming it
   /custom cabinet/i,
   /cabinet (maker|shop|making)/i,
 ];
@@ -257,7 +259,7 @@ It gets ${cand.impressions} impressions over 90 days and the site currently sits
 Hard rules:
 - Write for a homeowner deciding who to hire, not for a search engine.
 - Never invent facts. No made-up prices, project counts, awards, review counts or customer names. If a number would help and you do not have it, describe the range in general terms or leave it out.
-- Geo Carpentry does NOT build custom cabinets from scratch and does NOT do commercial work. Do not imply otherwise.
+- Geo Carpentry does NOT build custom cabinets from scratch. It DOES do commercial construction. Do not claim industrial scale work.
 - Plain, warm, direct. No hype. No em dashes. Avoid stacking adjectives in threes.
 - 900 to 1400 words.
 - Include these internal links naturally in the body, as markdown links:
@@ -346,7 +348,7 @@ Fetch that page and say what specifically to change so it can reach page one for
 Rules:
 - Be concrete. Quote the current title and heading, then write the replacement.
 - Never invent facts. No made-up prices, project counts, awards or review numbers.
-- No commercial or industrial work. No custom cabinet making. The business does not do these.
+- Commercial construction is in scope. Industrial scale is not confirmed, so do not claim it. No custom cabinet making from scratch.
 - Rank recommendations by expected impact, and say plainly when something will not move without more authority from reviews and links.
 - At most 8 recommendations. Fewer is better.
 
