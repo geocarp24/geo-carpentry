@@ -8,11 +8,18 @@ Para un contratista, en la búsqueda de "general contractor green bay" lo primer
 
 Geo tiene 500 proyectos desde 2014 y casi nada de eso está en Google. Es la brecha más grande que hay entre lo que el negocio es y lo que Google cree que es.
 
-## Antes de enviar: consigue el enlace corto
+## El enlace ya está montado
 
-En la app de Google Business Profile, o en el perfil desde el buscador, entra a **Pedir reseñas**. Google te da un enlace corto tipo `g.page/r/XXXXXXXX/review` que abre directo la ventana de escribir la reseña.
+**geocarpentry.com/review**
 
-Ese enlace va donde dice `geocarpentry.com/review` en los mensajes. Un enlace que obliga a buscar el negocio pierde a la mitad de la gente por el camino.
+Redirige al formulario de reseñas de Google. También funcionan `/reviews` y `/resenas`. Se puede decir por teléfono, cabe en una tarjeta, y está impreso en el QR de `automation/assets/qr-review-geocarpentry.png`.
+
+La ventaja de usar tu propio dominio en vez del enlace de Google: si mañana cambia el perfil, se cambia el destino en un archivo y todo lo que ya imprimiste sigue funcionando.
+
+Datos por si se necesitan en otro lado:
+
+- Enlace de Google: `https://g.page/r/CW11zSNR9BL0EBM/review`
+- Place ID: `ChIJ49c5Tlf7S4QRbXXNI1H0EvQ`
 
 ## Mensaje 1, para cliente reciente (inglés)
 
