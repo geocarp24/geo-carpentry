@@ -167,10 +167,14 @@ class Geo_Internal_Links {
 				];
 			}
 
-			// Point back to the top-level service hub, which is the page we want
-			// to consolidate authority on.
-			$back = '<p class="geo-il__back"><a href="' . esc_url( home_url( '/' . $service . '/' ) ) . '">'
-				. esc_html( 'All ' . self::SERVICE_LABEL[ $service ] . ' work' ) . '</a></p>';
+			// Point back to the /services/ page, which holds the real content and
+			// is the URL we consolidate on. See geo-hub-consolidation.php.
+			$parent_slug = array_search( $service, self::SERVICE_MAP, true );
+			$back = '';
+			if ( $parent_slug ) {
+				$back = '<p class="geo-il__back"><a href="' . esc_url( home_url( '/services/' . $parent_slug . '/' ) ) . '">'
+					. esc_html( 'All ' . self::SERVICE_LABEL[ $service ] . ' work' ) . '</a></p>';
+			}
 
 			return $content
 				. $this->block( 'Other work we do in ' . $city_label, '', $same_city )
