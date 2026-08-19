@@ -1,5 +1,5 @@
 # GEO CARPENTRY — ESTADO ACTUAL DEL PROYECTO
-> Última actualización: 2026-08-16 (GeoBudget Roofing — Repair Mode + Carpentry Extras materials table completo)
+> Última actualización: 2026-08-17 (Meta Ads aprobadas · GitHub backup automático · NUMERIC_TIME fixes)
 
 ---
 
@@ -134,6 +134,36 @@ Geo Carpentry LLC es un General Contractor en Green Bay, WI (propietario Jorge C
 
 ---
 
+### ✅ COMPLETADO SESIÓN 2026-08-17 — Meta Ads + GitHub Backup
+
+1. **Meta Ads — $50/semana APROBADO por Jorge** ✅
+   - Campaña A (English): $25/semana · FB+IG · edad 35-65 · Green Bay +25mi · homeowners
+   - Campaña B (Spanish/Hispanic): $25/semana · FB+IG · edad 30-60 · Green Bay +25mi
+   - Objetivo: Messages (DM → estimado)
+   - 6 creativos seleccionados del pool de Visual Listo (score ≥ 8):
+     - EN: recwZtAefTuKE38MK (Tub→Shower IG s9), recfsbjY7orovpqtW (Shower Honest IG s9), recRkHPWuZeyGUdY8 (You Asked FB+IG s8)
+     - ES: recoC1SMskMxPioXa (Ducha vs Tina IG s9), rechU6hg8wNvz7ypS (Cedro vs Compuesto FB s9), rec8cthYFwuH6eE06 (Cocina 90s IG s8)
+   - HANDOFF_CC_META_ADS_AGENT.md creado — campañas se crean en PAUSED, Jorge activa manualmente
+   - ⚠️ CC necesita: confirmar Ad Account ID, IG Business Account ID, nombre del campo imagen en Geo_Posts
+
+2. **Scheduler agent (programador.mjs) — CANCELADO** ✅
+   - CC confirmó: Social_Insights no existe, El Analítico escribe métricas PER POST en Geo_Posts
+   - Publisher ya maneja Programado correctamente — no hay gap
+   - Problema real: 6 FB followers / 5 IG followers = reach de ~3 personas → solución = Meta Ads
+
+3. **NUMERIC_TIME_CLAIM fixes** ✅
+   - 4 captions corregidas: rec3gJsqLJeycopGP, recOLjg6Pkd9qT7vk, recQ1qGveegwAFcQR, recg2Fsyy4URnEDPU
+   - Seeds corregidos: D02 (cedar year 1), D07 (65-80 cents), D10 (year 4), R02 (weeks), R08 (week by week), B02 (71 cents), B03 (1987 year)
+
+4. **GitHub Backup** ✅
+   - Repo: https://github.com/geocarp24/geo-carpentry (PRIVATE)
+   - 118 archivos: memoria, 25 handoffs, agentes VPS, tenant configs, 30 páginas SEO ES
+   - Backup automático diario 11pm via Cowork scheduled task (geo-carpentry-git-backup)
+   - .env con GitHub PAT en Memory Claude (gitignored)
+   - Airtable token redactado en RULES.md y HANDOFF_LEAD_CAPTURE.md antes del push
+
+---
+
 ### ✅ COMPLETADO SPRINT 2026-08-16B — GeoBudget Roofing upgrades
 
 **Archivo:** `budget/roofing/index.html` — listo para subir a Hostinger
@@ -182,10 +212,13 @@ Geo Carpentry LLC es un General Contractor en Green Bay, WI (propietario Jorge C
 
 | Prioridad | Tarea | Responsable | Estado |
 |---|---|---|---|
-| 🔴 CC #1 | **Actualizar Caption de 10 posts** con textos de POSTS_REESCRITOS_10_CW.md | CC | Entregado por Cowork 2026-08-16 |
-| 🔴 CC #2 | **Correr Oráculo** sobre los 10 posts reescritos (no asignar score manual) | CC | Después de CC #1 |
-| 🔴 CC #3 | **Inyectar 30 seeds** en system prompt de `creativo` / `director_v2` | CC | Ver SEEDS_GENERADOR_30_ANGULOS.md |
-| 🔴 CC #4 | Verificar publisher cadence daily en crontab (fue Tue/Fri) | CC | — |
+| 🔴 CC #1 | **Construir meta_ads.mjs** — crear 2 campañas en PAUSED + 6 ads | CC | Ver HANDOFF_CC_META_ADS_AGENT.md |
+| 🔴 CC #2 | **Actualizar Caption de 10 posts** con textos de POSTS_REESCRITOS_10_CW.md | CC | Entregado por Cowork 2026-08-16 |
+| 🔴 CC #3 | **Correr Oráculo** sobre los 10 posts reescritos (no asignar score manual) | CC | Después de CC #2 |
+| 🔴 CC #4 | **Inyectar 30 seeds** en system prompt de `creativo` / `director_v2` | CC | Ver SEEDS_GENERADOR_30_ANGULOS.md |
+| 🔴 CC #5 | Verificar publisher cadence daily en crontab (fue Tue/Fri) | CC | — |
+| 🟡 JORGE | **Activar campañas** en Meta Ads Manager después de que CC cree los ads | Jorge | Después de CC #1 |
+| 🟡 JORGE | **SMS Review Requests** — filtrar Geo_Leads (35 registros) para separar clientes reales | Cowork+Jorge | Próxima sesión |
 | 🟡 JORGE | Revisar GBP quota case #5-5881000041235 y llenar checkbox en DECISION_NOVA | Jorge | — |
 | 🟡 JORGE | **Make Review Request** — Escenario ID 5893163 INACTIVO | Jorge | Activar + cambiar FROM phone |
 | 🟡 JORGE | Re-autorizar Airtable OAuth en Make.com (expiró 2026-07-05) | Jorge | — |

@@ -39,6 +39,30 @@
 
 ---
 
+---
+
+## 2026-08-17
+
+### DEC-008: Meta Ads — $50/semana aprobado
+**Decisión:** Lanzar Meta Ads con objetivo Messages · $50/semana de cuenta Geo Carpentry LLC
+**Rationale:** Pipeline de contenido funciona (23 posts Visual Listo score ≥7) pero reach orgánico = ~3 personas (6 FB / 5 IG followers). Distribución es el problema, no el contenido.
+**Estructura:** 2 campañas (EN $25/sem + ES/Hispanic $25/sem) · 6 creativos (3 EN + 3 ES) · Green Bay +25mi · 35-65 homeowners
+**Handoff:** HANDOFF_CC_META_ADS_AGENT.md — CC crea campañas en PAUSED, Jorge activa manualmente
+**Alternativas descartadas:** Boost de posts (menos control), solo orgánico (insuficiente), LinkedIn (B2C no aplica)
+
+### DEC-009: No construir programador.mjs
+**Decisión:** Cancelar handoff de agente de scheduling inteligente
+**Rationale:** CC confirmó que (1) Social_Insights no existe, (2) El Analítico escribe métricas per-post en Geo_Posts no en tabla separada, (3) publisher ya maneja Programado correctamente. El handoff estaba basado en premisas incorrectas.
+**Lección:** Verificar con CC antes de diseñar agentes que asumen arquitectura existente.
+
+### DEC-010: GitHub backup automático — Cowork scheduled task
+**Decisión:** Backup diario de Memory Claude a github.com/geocarp24/geo-carpentry via tarea automática de Cowork (no Windows Task Scheduler)
+**Rationale:** Cowork corre el script directamente · no requiere que Jorge toque la terminal · se activa sola diariamente a las 11pm
+**Repo:** https://github.com/geocarp24/geo-carpentry (PRIVATE)
+**Seguridad:** vps_key excluida por .gitignore · tokens redactados en archivos de texto · PAT almacenado en .env (gitignored)
+
+---
+
 ## HISTORIAL (sesiones anteriores)
 
 ### Sesiones anteriores a 2026-05-27
