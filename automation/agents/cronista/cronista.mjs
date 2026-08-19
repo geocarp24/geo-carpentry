@@ -280,20 +280,20 @@ Return ONLY this, no preamble:
 `;
 }
 
+/**
+ * Split on the marker lines instead of matching each section with a lookahead.
+ * The previous version used `(?=---TAG---|$)` without the multiline flag, so `$`
+ * only matched end of string and every field came back empty. It never showed
+ * up because until 2026-08-18 the agent had no article to parse.
+ */
 function parseArticle(raw) {
-  const grab = (tag, next) => {
-    const re = new RegExp(`---${tag}---\\s*([\\s\\S]*?)\\s*(?=---${next}---|$)`);
-    const m = raw.match(re);
-    return m ? m[1].trim() : "";
-  };
-  return {
-    title: grab("TITLE", "SLUG"),
-    slug: grab("SLUG", "META"),
-    meta: grab("META", "BODY"),
-    body: grab("BODY", "ENDOFTEXT"),
-  };
+  const parts = raw.split(/^---([A-Z]+)---$/m);
+  const out = {};
+  for (let i = 1; i < parts.length; i += 2) {
+    out[parts[i].toLowerCase()] = (parts[i + 1] || "").trim();
+  }
+  return { title: out.title || "", slug: out.slug || "", meta: out.meta || "", body: out.body || "" };
 }
-
 
 /* ------------------------------------------------------------- Improvement briefs */
 
