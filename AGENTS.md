@@ -10,5 +10,8 @@ Before analyzing, proposing, or changing this repository:
 6. After meaningful work, update the relevant documents, `CHANGELOG.md`, and a dated session log.
 7. Do not claim completion without verification evidence.
 8. Do not modify or update WordPress, plugins, themes, or the child theme unless Jorge explicitly authorizes the exact operation.
+9. The daily memory routine may inspect and update sanitized documentation only. It must never modify production, merge its own PR, or publish secret-bearing files.
+10. Before every public-memory update, scan the exact proposed files for credentials, client data, raw conversations, private infrastructure details, contracts, and financial or legal information.
 
 The canonical cross-AI memory lives in `AI_WORKSPACE/`.
+
