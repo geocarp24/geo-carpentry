@@ -118,3 +118,8 @@ Complete the controlled SMS delivery path, repair scheduled-worker authorization
 ## Safety and exclusions
 
 WordPress was not modified. This record excludes credentials, account identifiers, phone numbers, client names, addresses, message content, raw logs, conversations, contracts, financial or legal information, database data, and exploitable access details.
+
+## 2026-08-21 — Calendar travel-safety hardening
+
+Diagnosed that Google Calendar already contained event locations but the availability bridge discarded them. The bridge now returns verified event timing/location metadata internally, and ALEX applies a deterministic pre-plan safety gate to estimate creation and rescheduling. Same-city cases pass; distant or unverifiable different locations on the same day stop safely and ask Jorge for one operational decision. Production verification: 87/87 tests, both services active, live event shape valid. No Calendar event, customer record, email, SMS, Airtable record, or WordPress content was changed.
+
