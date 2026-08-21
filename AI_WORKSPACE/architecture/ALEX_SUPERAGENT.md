@@ -13,9 +13,10 @@ ALEX is Jorge's operating assistant for Geo Carpentry. Its job is to understand 
 3. **Verified context** — reads Calendar availability, Airtable leads, Hostinger email, GEO SMS history, projects, durable memories, recent plans, and integration events.
 4. **Unified client profile** — reconciles identity by stable Airtable record or unique normalized phone, then combines conversation summary, pending question, recent messages, durable facts, projects, last contact, and source conflicts.
 5. **Priority engine** — marks inbound replies or unresolved questions high priority, active projects medium priority, and supplies a deterministic next-action signal.
-6. **Policy gate** — denies forbidden capabilities and requires approval for consequential Calendar, Airtable, SMS, and email operations.
-7. **Controlled executors** — use previews, input validation, idempotency, provider receipts, and post-action verification.
-8. **Durable PostgreSQL memory** — stores people, projects, conversations, messages, memories, plans, approvals, tool executions, audit records, external-object mappings, and integration events.
+6. **Travel-safety gate** — compares a proposed estimate or reschedule against verified same-day Calendar locations and stops distant or unverifiable combinations before plan persistence.
+7. **Policy gate** — denies forbidden capabilities and requires approval for consequential Calendar, Airtable, SMS, and email operations.
+8. **Controlled executors** — use previews, input validation, idempotency, provider receipts, and post-action verification.
+9. **Durable PostgreSQL memory** — stores people, projects, conversations, messages, memories, plans, approvals, tool executions, audit records, external-object mappings, and integration events.
 
 ## Current capabilities
 
@@ -30,6 +31,7 @@ ALEX is Jorge's operating assistant for Geo Carpentry. Its job is to understand 
 - Prepare drafts, organize folders, move to review/trash, restore, send, or permanently delete through capability-specific approval rules.
 - Read GEO SMS context and use a controlled SMS adapter with preview, idempotency, provider receipt, delivery polling, and verification.
 - Correct mismatched English or Spanish weekday/date labels before displaying a response.
+- Prevent unsafe geographically separated same-day estimate commitments using verified Calendar event metadata; unknown distance fails conservatively.
 - Fail closed when identity, availability, mailbox contents, approval state, or external verification changes.
 
 ## Safety rules
@@ -43,7 +45,8 @@ ALEX is Jorge's operating assistant for Geo Carpentry. Its job is to understand 
 
 ## Known remaining limits
 
-- Route distance and travel-time feasibility need deterministic integration before every same-day appointment recommendation.
+- The current deterministic route guard covers known Northeast Wisconsin cities and unknown-location fail-closed behavior; broader city coverage and true road travel-time calculation remain future enhancements.
 - Historical owner conversations from before durable-memory activation are not reconstructed automatically.
 - Old components remain installed as rollback until the replacement has sustained production evidence.
 - Public documentation intentionally excludes client data, secrets, raw conversations, production archives, and exact access details.
+
