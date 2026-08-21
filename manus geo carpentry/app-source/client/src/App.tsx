@@ -6,6 +6,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import CalendarVisual from "./pages/CalendarVisual";
+import EditorialReview from "./pages/EditorialReview";
 import Home from "./pages/Home";
 
 function Workspace({ section }: { section: "overview" | "library" | "calendar" | "cleanup" }) {
@@ -17,6 +18,7 @@ function Router() {
     <Switch>
       <Route path="/" component={() => <Workspace section="overview" />} />
       <Route path="/biblioteca" component={() => <Workspace section="library" />} />
+      <Route path="/revision-editorial" component={() => <DashboardLayout><EditorialReview /></DashboardLayout>} />
       <Route path="/calendario" component={() => <DashboardLayout><CalendarVisual /></DashboardLayout>} />
       <Route path="/limpieza" component={() => <Workspace section="cleanup" />} />
       <Route path="/404" component={NotFound} />

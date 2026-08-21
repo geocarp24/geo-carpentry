@@ -1,4 +1,4 @@
-import { and, count, desc, eq, isNull, ne, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, isNull, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   cleanupCandidates,
@@ -40,6 +40,16 @@ export async function getMediaAssetsByUser(userId: number) {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(mediaAssets).where(eq(mediaAssets.userId, userId)).orderBy(desc(mediaAssets.createdAt));
+}
+
+export async function getVerifiedMediaMigrationBatch(userId: number, afterId: number, limit: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(mediaAssets).where(and(
+    eq(mediaAssets.userId, userId),
+    eq(mediaAssets.backupVerified, true),
+    gt(mediaAssets.id, afterId),
+  )).orderBy(asc(mediaAssets.id)).limit(limit);
 }
 
 export async function getMediaAssetById(userId: number, id: number) {

@@ -10,7 +10,7 @@ import * as db from "./db";
 import { createContext } from "./_core/context";
 import { ENV } from "./_core/env";
 import { MAX_DIRECT_UPLOAD_BYTES, MAX_SERVER_UPLOAD_BYTES } from "./mediaImportRules";
-import { storageGet, storageGetSignedUrl, storagePrepareDirectUpload, storagePut } from "./storage";
+import { storageGet, storageGetObject, storageGetSignedUrl, storageIsSelfHosted, storagePrepareDirectUpload, storagePut } from "./storage";
 import { ALLOWED_EXTENSIONS, classifyFile, duplicateReviewReason, shouldProposeBlurCleanup } from "./mediaRules";
 
 export { ALLOWED_EXTENSIONS, classifyFile } from "./mediaRules";
@@ -65,6 +65,18 @@ async function requireAuthenticatedUser(req: AuthenticatedRequest, res: Response
 }
 
 async function inspectStoredObject(storageKey: string) {
+  if (storageIsSelfHosted()) {
+    const object = await storageGetObject(storageKey);
+    if (!object.Body) throw new Error("No fue posible recuperar el objeto local para verificarlo");
+    const verificationHash = crypto.createHash("sha256");
+    let sizeBytes = 0;
+    for await (const chunk of object.Body as NodeJS.ReadableStream) {
+      const data = Buffer.from(chunk);
+      verificationHash.update(data);
+      sizeBytes += data.length;
+    }
+    return { checksumSha256: verificationHash.digest("hex"), sizeBytes };
+  }
   const signedUrl = await storageGetSignedUrl(storageKey);
   const response = await fetch(signedUrl);
   if (!response.ok || !response.body) throw new Error("No fue posible recuperar la copia almacenada para verificarla");
@@ -115,6 +127,18 @@ async function registerVerifiedMedia(input: { user: User; importId: number | nul
 }
 
 export function registerMediaUploadRoutes(app: Express) {
+  app.get("/api/media/file", requireAuthenticatedUser, async (req: AuthenticatedRequest, res) => {
+    try {
+      const key = typeof req.query.key === "string" ? req.query.key : "";
+      if (!key || key.includes("..")) return res.status(400).json({ error: "Clave de archivo inválida" });
+      const object = await storageGetObject(key);
+      if (!object.Body) return res.status(404).end();
+      if (object.ContentType) res.setHeader("Content-Type", object.ContentType);
+      if (object.ContentLength) res.setHeader("Content-Length", object.ContentLength);
+      Readable.from(object.Body as NodeJS.ReadableStream).pipe(res);
+    } catch { res.status(404).json({ error: "Archivo no disponible" }); }
+  });
+
   app.post("/api/media/prepare-upload", requireAuthenticatedUser, async (req: AuthenticatedRequest, res) => {
     try {
       const user = req.currentUser!;
@@ -171,4 +195,5 @@ export function registerMediaUploadRoutes(app: Express) {
       res.status(201).json({ ...result, backupVerified: true, checksumSha256 });
     } catch (error) { res.status(500).json({ error: error instanceof Error ? error.message : "No se pudo respaldar el archivo" }); }
   });
+
 }

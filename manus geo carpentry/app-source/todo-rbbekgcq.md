@@ -18,7 +18,62 @@
 - [x] Auditar el estado real de medios, clasificación, importaciones, conexiones y cambios de código; sin registros en `media_imports`.
 - [x] Redactar un handoff completo con secretos, tokens y credenciales protegidos.
 - [x] Preparar el handoff y el estado de código para guardar el punto de control de entrega.
-- [ ] Preparar un paquete seguro de código, manuales, inventarios, notas y handoff para GitHub.
-- [ ] Excluir secretos, tokens, registros sensibles, dependencias generadas y archivos internos no transferibles.
-- [ ] Crear la carpeta `manus geo carpentry` en el repositorio seleccionado y verificar su contenido.
-- [ ] Subir el paquete de continuidad al repositorio GitHub seleccionado.
+- [x] Preparar un paquete seguro de código, manuales, inventarios, notas y handoff para GitHub.
+- [x] Excluir secretos, tokens, registros sensibles, dependencias generadas y archivos internos no transferibles.
+- [x] Crear la carpeta `manus geo carpentry` en el repositorio seleccionado y verificar su contenido.
+- [x] Subir el paquete de continuidad al repositorio GitHub seleccionado.
+- [x] Crear y validar una habilidad reutilizable para respaldo seguro de medios, clasificación y handoff.
+- [x] Verificar el estado actual de los videos e imágenes antes de reanudar la carga y clasificación.
+- [x] Respaldar los 109 videos estándar dentro del límite de carga sin alterar los originales locales.
+- [x] Clasificar 408 imágenes verificadas por lotes y registrar 42 elementos pendientes de revisión humana.
+- [x] Documentar el estado actualizado y retirar los accesos temporales utilizados durante la reanudación.
+- [x] Habilitar y retirar un canal temporal autenticado, limitado a videos, para transferir desde el equipo local.
+- [x] Acelerar los lotes de video y la clasificación por lotes, manteniendo verificación de integridad y revisión humana.
+- [x] Habilitar y retirar carga directa temporal para los 8 videos que superan el límite estándar de 250 MB.
+- [x] Habilitar y retirar un clasificador temporal autenticado para procesar las imágenes verificadas por lotes.
+- [x] Documentar el bloqueo de clasificación de las imágenes restantes por agotamiento del servicio de IA.
+- [x] Respaldar los 6 videos restantes de hasta 1 GB y completar el tratamiento verificado de `IMG_1935.MOV` (~1.21 GB).
+- [x] Verificar los tamaños y checksums de los siete videos locales pendientes antes de cargarlos a Hostinger.
+- [x] Cargar por una ruta directa e interna de Hostinger los seis videos locales de hasta 1 GB y verificar cada checksum.
+- [x] Ajustar el proxy de almacenamiento de Hostinger y documentar el uso alternativo de transferencia interna para videos grandes.
+- [x] Transferir los seis videos pendientes por SFTP al VPS de Hostinger y verificarlos desde la aplicación sin usar el proxy web.
+- [x] Habilitar y retirar un importador temporal interno del VPS para registrar con checksum los videos transferidos por SFTP.
+- [x] Generar y contrastar un manifiesto de tamaño y SHA-256 de los siete videos locales con los respaldos verificados en Hostinger.
+- [ ] Clasificar las 40 imágenes pendientes después de restablecer la disponibilidad del servicio de IA.
+- [x] Revisar las propiedades y la configuración disponible de Hostinger para una ruta de visualización compatible.
+- [ ] Organizar las imágenes de trabajo verificadas en una estructura editorial sin publicar contenido.
+- [x] Crear una estructura de revisión editorial no publicable para los medios de trabajo disponibles sin inventar proyectos ni publicaciones.
+- [x] Auditar que no existan publicaciones aprobadas, contenido programado ni eliminaciones derivadas de propuestas de limpieza.
+- [x] Preparar una vista y guía editorial neutral para asignar posteriormente los 189 medios de trabajo a proyectos reales.
+- [x] Crear una vista editorial neutral en la aplicación para revisar los 189 medios de trabajo sin asignación automática ni publicación.
+- [x] Verificar en Hostinger que la vista editorial no publicable carga los medios de trabajo y conserva sus estados pendientes.
+- [x] Preparar una plantilla segura para que el propietario proporcione proyectos y etapas reales antes de asignar medios.
+- [ ] Actualizar únicamente la carpeta `manus geo carpentry` de GitHub con el estado y los documentos seguros posteriores a la migración de Hostinger.
+- [x] Restablecer el acceso visual de la aplicación existente de Hostinger mediante su dominio activo.
+- [x] Auditar la ruta de despliegue existente de media.geocarpentry.com y actualizarla sin reemplazar su configuración de Hostinger.
+- [x] Resolver o documentar el bloqueo de autenticación Cloudflare de Hostinger y usar una ruta alternativa de despliegue si existe.
+- [x] Localizar y reutilizar los artefactos y la configuración existentes de la integración de media.geocarpentry.com.
+- [x] Rotar las credenciales internas de sesión, MySQL y MinIO del VPS que quedaron expuestas durante la auditoría, sin revelar valores.
+- [x] Crear y verificar un respaldo completo de Hostinger que incluya código, base de datos y almacenamiento MinIO.
+- [x] Verificar que el handoff principal incorpora la topología y el procedimiento real de Hostinger sin incluir secretos.
+- [x] Contener la exposición detectada y preparar una rotación segura de credenciales de Hostinger, MySQL y MinIO.
+- [ ] Rotar las credenciales de Meta expuestas desde el portal de Meta y actualizar únicamente el entorno seguro del VPS.
+- [x] Rotar el acceso SSH del VPS de Hostinger y validar la conexión sin exponer claves privadas.
+- [x] Verificar públicamente media.geocarpentry.com después de la rotación final de accesos de hosting.
+- [x] Verificar el respaldo Hostinger iniciado y continuar mediante staging sin esperar una copia redundante de medios.
+- [x] Restaurar la compatibilidad de acceso de Hostinger en la actualización para preservar la visualización existente.
+- [x] Migrar de forma verificada los 558 medios administrados hacia Hostinger como biblioteca principal visible, sin eliminar los 8 medios existentes.
+- [x] Implementar el manifiesto y la migración por lotes con enlaces firmados, checksum y reversión hacia Hostinger.
+- [x] Conservar el token de Meta actual sin publicar contenido y diferir la rotación hasta la entrega final.
+- [x] Mantener los 30 candidatos de limpieza como propuestas para revisión manual final.
+- [x] Habilitar y retirar un canal temporal autenticado de exportación para migrar los medios hacia Hostinger por lotes verificables.
+- [x] Ejecutar y verificar un lote piloto de 20 imágenes migradas hacia Hostinger antes de transferir el resto de la biblioteca.
+- [x] Restaurar el adaptador de almacenamiento MinIO de Hostinger en la compilación actualizada para habilitar cargas verificadas.
+- [x] Habilitar y retirar un importador temporal autenticado en Hostinger para migrar los lotes verificados desde el origen.
+- [x] Transferir el resto de la biblioteca por lotes reanudables y comprobar cada checksum en Hostinger.
+- [x] Conciliar en Hostinger las categorías, confianza y estados de revisión de los 558 medios migrados.
+- [x] Migrar las 30 propuestas de limpieza a Hostinger como propuestas pendientes de revisión manual.
+- [x] Verificar en Hostinger si los 8 medios preexistentes siguen presentes o documentar su deduplicación exacta contra los 558 migrados.
+- [x] Auditar en Hostinger classificationSource, classificationConfidence, stage y reviewStatus de los 558 medios migrados antes de cerrar la conciliación.
+- [x] Retirar los canales temporales de exportación, importación y conciliación utilizados para la migración a Hostinger.
+- [x] Verificar que las rutas temporales de migración ya no estén accesibles en Hostinger después del despliegue final.

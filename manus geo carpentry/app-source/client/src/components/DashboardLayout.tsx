@@ -5,7 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { CalendarDays, FolderHeart, LayoutDashboard, LogOut, PanelLeft, ShieldCheck } from "lucide-react";
+import { CalendarDays, ClipboardCheck, FolderHeart, LayoutDashboard, LogOut, PanelLeft, ShieldCheck } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
@@ -13,6 +13,7 @@ import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 const menuItems = [
   { icon: LayoutDashboard, label: "Resumen", path: "/" },
   { icon: FolderHeart, label: "Biblioteca", path: "/biblioteca" },
+  { icon: ClipboardCheck, label: "Revisión editorial", path: "/revision-editorial" },
   { icon: CalendarDays, label: "Calendario", path: "/calendario" },
   { icon: ShieldCheck, label: "Limpieza", path: "/limpieza" },
 ];

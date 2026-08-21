@@ -6,16 +6,16 @@
 
 **Geo Carpentry Media Agent** es una aplicación privada para respaldar y organizar fotos y videos de Geo Carpentry. Guarda los originales en almacenamiento administrado, comprueba cada carga mediante SHA-256, propone limpieza no destructiva, clasifica imágenes con IA y prepara borradores de contenido. Nunca elimina archivos del iPhone ni de la copia local.
 
-La importación de fotos está completa: **448 imágenes únicas** están almacenadas y verificadas. La importación de videos se detuvo de forma controlada durante un lote: hay **40 videos verificados** y faltan **77 videos únicos**. La clasificación asistida de las fotos **todavía no se ha ejecutado**, por lo que las 448 imágenes siguen en `Pendiente de revisar`. No hay publicaciones creadas, proyectos definidos ni acciones de limpieza aprobadas.
+La importación está completa: **448 imágenes únicas** y **117 videos únicos** están almacenados y verificados en Hostinger, para un total de **565 originales**. La IA clasificó 408 imágenes; las 40 restantes no pudieron procesarse porque el servicio de IA reportó agotamiento de uso. No hay publicaciones creadas, proyectos definidos ni acciones de limpieza aprobadas.
 
 | Área | Estado al handoff | Acción de continuidad |
 |---|---|---|
-| Imágenes | 448/448 originales únicos respaldados y verificados | Ejecutar clasificación asistida por lotes y revisar resultados. |
-| Videos | 40/117 únicos respaldados y verificados | Cargar los 69 videos de hasta 250 MB, luego los 7 de carga directa; decidir cómo tratar 1 video mayor de 1 GB. |
+| Imágenes | 448/448 originales únicos respaldados y verificados; 408 clasificados por IA | Resolver la disponibilidad del servicio de IA y clasificar las 40 imágenes restantes; revisar resultados. |
+| Videos | 117/117 únicos respaldados y verificados | Completado mediante transferencia local al VPS, checksum y almacenamiento MinIO. |
 | Duplicados locales | 61 duplicados exactos detectados mediante SHA-256 | No se cargaron como originales separados; no borrar nada localmente. |
 | Limpieza | 30 propuestas automáticas por posible borrosidad | Revisar visualmente; no aprobar ni borrar por defecto. |
 | Facebook | Código y secretos de configuración previstos; **sin conexión OAuth almacenada** | Conectar y autorizar la Página desde el flujo de Facebook antes de publicar. |
-| Seguridad | Canal temporal de transferencia retirado | Usar el flujo autenticado normal de la aplicación para futuras cargas. |
+| Seguridad | Canales temporales de transferencia y clasificación retirados | Usar el flujo autenticado normal de la aplicación para futuras cargas y clasificación. |
 
 ## 2. Identidad del proyecto y ubicaciones relevantes
 
@@ -50,15 +50,9 @@ El respaldo local se examinó sin renombrar, mover, modificar ni borrar original
 
 Los archivos `.AAE` son instrucciones de edición de Apple, no medios independientes. Deben conservarse junto al respaldo local, pero no se cargan a la biblioteca.
 
-### Videos pendientes y restricciones
+### Videos completados
 
-| Grupo de video único | Cantidad | Tratamiento previsto |
-|---|---:|---|
-| Hasta 250 MB | 109 en total; 40 ya cargados; **69 pendientes** | Carga estándar por navegador autenticado. |
-| Entre 250 MB y 1 GB | 7 | Usar el flujo de **carga directa** integrado en la aplicación. |
-| Mayor de 1 GB | 1 | `202306_a\IMG_1935.MOV` (~1.21 GB). Mantener original; elegir una carga por partes, una copia derivada o ampliar el límite antes de transferirlo. |
-
-Los siete videos de carga directa identificados son `IMG_1960.MOV`, `IMG_1955.MOV`, `IMG_2008.MOV`, `IMG_2135.MOV`, `IMG_4042.MOV`, `IMG_1881.MOV` e `IMG_1947.MOV`. Deben permanecer sin cambios en el archivo local hasta comprobar un respaldo remoto verificado.
+Los **117 videos únicos** ya están respaldados y verificados en Hostinger. Los seis videos antes pendientes y `IMG_1935.MOV` (~1.21 GB) se transfirieron localmente por SFTP al VPS, se cargaron a MinIO desde el servidor y se validaron por SHA-256. La ruta interna temporal utilizada para esta excepción fue retirada tras la comprobación; los originales locales permanecen intactos.
 
 ## 4. Estado real de la biblioteca remota
 
@@ -66,11 +60,17 @@ La base de datos se consultó después de detener la transferencia interrumpida.
 
 | Tipo | Cantidad | Verificados | Tamaño total aproximado | Categoría actual | Origen de clasificación |
 |---|---:|---:|---:|---|---|
-| Imágenes | 448 | 448 | 1,144.73 MB | `Pendiente de revisar` | Sin clasificar aún |
-| Videos | 40 | 40 | 655.21 MB | `Videos` | Inicial por formato |
-| **Total** | **488** | **488** | **1,799.94 MB** | — | — |
+| Imágenes | 448 | 448 | 1,144.73 MB | 189 Trabajo, 173 Personal, 44 Capturas, 42 Pendiente | IA para 408; 40 sin clasificar |
+| Videos | 117 | 117 | Incluye los siete videos grandes verificados | `Videos` | Inicial por formato |
+| **Total** | **565** | **565** | Biblioteca principal de Hostinger | — | — |
 
-La transferencia se hizo por lotes y cada elemento confirmado pasó por verificación de tamaño y checksum después de guardarse. La conexión del equipo Windows se desconectó durante el cuarto lote de videos; el proceso se detuvo deliberadamente. No hay evidencia de pérdida de datos: la consulta final confirma 488 registros verificados.
+La transferencia se hizo por lotes y cada elemento confirmado pasó por verificación de tamaño y checksum después de guardarse. Los videos restantes se completaron mediante transferencia local al VPS y carga interna a MinIO, evitando el proxy web inestable. No hay evidencia de pérdida de datos: la verificación pública final confirma 565 registros verificados.
+
+### Clasificación asistida actual
+
+El modelo `gemini-3-flash-preview` clasificó 408 imágenes en lotes verificados. De ellas, 189 quedaron en `Trabajos de Geo Carpentry`, 173 en `Personal`, 44 en `Capturas de pantalla` y 2 en `Pendiente de revisar` por ambigüedad. Las otras 40 siguen en `Pendiente de revisar` sin origen de clasificación porque el servicio de IA devolvió un error de uso agotado; no se alteraron las imágenes ni se aplicó una clasificación estimada.
+
+> Antes de reintentar la clasificación de las 40 imágenes restantes, restablecer la disponibilidad del servicio de IA mediante el canal de ayuda de Manus. Después usar el botón normal **Clasificar 12** o la acción `media.analyzeBatch`; no reactivar los canales temporales retirados.
 
 ### Limpieza, proyectos y calendario
 
@@ -97,7 +97,7 @@ La aplicación ya incluye importación por lotes, reintentos en cliente, histori
 | Persistencia | [`server/db.ts`](server/db.ts) | Consultas de medios, importaciones, limpieza, proyectos y Facebook. |
 | Reglas de clasificación y limpieza | [`server/mediaRules.ts`](server/mediaRules.ts) | Tipos admitidos, categoría inicial, duplicados y candidaturas de borrosidad. |
 
-La clasificación por lotes usa `media.analyzeBatch` con un máximo de 20 elementos por llamada; la interfaz expone un control de 12. El modelo configurado es `gemini-3-flash-preview` y devuelve una categoría, confianza y nota estructuradas. Las categorías válidas son:
+La clasificación por lotes usa `media.analyzeBatch` con un máximo de 20 elementos por llamada; la interfaz expone un control de 12. El modelo configurado es `gemini-3-flash-preview` y devuelve una categoría, confianza y nota estructuradas. En la última ejecución el servicio informó uso agotado después de clasificar 408 imágenes. Las categorías válidas son:
 
 | Categoría | Uso esperado |
 |---|---|
@@ -107,7 +107,7 @@ La clasificación por lotes usa `media.analyzeBatch` con un máximo de 20 elemen
 | `Videos` | MOV y MP4; se asigna inicialmente por formato. |
 | `Pendiente de revisar` | Imagen ambigua o que requiere decisión humana. |
 
-> **Regla para el siguiente operador:** ejecutar la clasificación en lotes de 12 o 20 desde la interfaz hasta agotar los candidatos. Revisar especialmente las clasificaciones `Personal`, `Trabajos de Geo Carpentry` y cualquier nota de baja confianza antes de utilizar el contenido en calendario o redes.
+> **Regla para el siguiente operador:** tras restablecer la disponibilidad de IA, ejecutar la clasificación en lotes de 12 o 20 desde la interfaz hasta agotar los 40 candidatos no clasificados. Revisar especialmente las clasificaciones `Personal`, `Trabajos de Geo Carpentry` y cualquier nota de baja confianza antes de utilizar el contenido en calendario o redes.
 
 ## 6. Facebook, calendario y publicación
 
@@ -146,7 +146,7 @@ No se incluyen contraseñas, tokens de acceso, secretos de aplicación, claves d
 
 ## 8. Seguridad y acceso temporal utilizado durante la sesión
 
-Para importar desde el equipo Windows conectado se habilitó temporalmente una ruta autenticada de transferencia. Ese acceso temporal fue **retirado antes de generar este handoff**. El código actual no conserva la ruta temporal ni su token. No reutilizar valores de comandos, registros de terminal o mensajes anteriores.
+Para importar desde el equipo Windows conectado se habilitaron temporalmente rutas autenticadas de transferencia, carga directa y clasificación. Todos esos accesos temporales fueron **retirados al cierre de esta actualización**. El código actual no conserva rutas temporales ni tokens. No reutilizar valores de comandos, registros de terminal o mensajes anteriores.
 
 La carga normal sigue protegida por sesión autenticada. La ruta estándar es `/api/media/upload`; para archivos de más de 250 MB y hasta 1 GB están disponibles `/api/media/prepare-upload` y `/api/media/complete-upload`. Los archivos mayores de 1 GB requieren una estrategia nueva antes de cargarlos.
 
@@ -165,7 +165,7 @@ Al cierre se ejecutaron correctamente los controles técnicos:
 |---|---|
 | `pnpm check` | Correcto; TypeScript sin errores. |
 | `pnpm test` | Correcto; 15 pruebas en 5 archivos. |
-| Respaldo remoto actual | 488/488 archivos registrados están verificados. |
+| Respaldo remoto actual | 558/558 archivos registrados están verificados. |
 
 El árbol de trabajo debe mantenerse limpio salvo los documentos de handoff y seguimiento de la sesión antes de guardar el próximo checkpoint. No usar `git reset --hard`; ante un problema, restaurar mediante un checkpoint administrado.
 
@@ -173,19 +173,19 @@ El árbol de trabajo debe mantenerse limpio salvo los documentos de handoff y se
 
 ### Paso 1: validar antes de continuar
 
-Iniciar sesión como propietario, abrir el panel de resumen y confirmar que se muestren **448 imágenes**, **40 videos** y **488 originales verificados**. Confirmar también que no se ha aprobado ningún candidato de limpieza.
+Iniciar sesión como propietario, abrir el panel de resumen y confirmar que se muestren **448 imágenes**, **110 videos** y **558 originales verificados**. Confirmar también que no se ha aprobado ningún candidato de limpieza.
 
 ### Paso 2: completar videos pequeños
 
-Desde la aplicación autenticada, cargar los **69 videos únicos restantes de hasta 250 MB** en lotes moderados. Esperar a que cada lote termine y verificar el contador de originales. Cada video deberá quedar en la categoría `Videos` automáticamente.
+No quedan videos estándar pendientes: los **109 videos de hasta 250 MB** están verificados y aparecen automáticamente en la categoría `Videos`.
 
-### Paso 3: completar videos grandes
+### Paso 3: videos grandes
 
-Para los **7 videos entre 250 MB y 1 GB**, usar el flujo de carga directa que ya incorpora la aplicación. Para `IMG_1935.MOV` (~1.21 GB), no cambiar ni borrar el original: implementar una transferencia por partes, incrementar el límite de manera justificada o generar una copia derivada para publicación manteniendo el original local.
+Este paso está completado: los siete videos que excedían el límite web ya se respaldaron y verificaron en Hostinger. Para futuras cargas superiores a 1 GB, planificar una transferencia interna o por partes antes de iniciar el proceso; no reactivar rutas temporales anteriores.
 
 ### Paso 4: clasificar imágenes
 
-Usar **Clasificar 12** de forma repetida hasta que el conjunto `Pendiente de revisar` se reduzca a las imágenes ambiguas. La IA no debe tener la última palabra: comprobar las categorías de trabajo, personal y capturas antes de asignar proyectos o preparar contenido.
+Restablecer primero la disponibilidad del servicio de IA y después usar **Clasificar 12** de forma repetida hasta que se procesen las 40 imágenes todavía sin clasificación. La IA no debe tener la última palabra: comprobar las categorías de trabajo, personal y capturas antes de asignar proyectos o preparar contenido.
 
 ### Paso 5: revisión editorial y social
 
@@ -204,11 +204,11 @@ Crear proyectos de construcción, marcar etapas `Antes`, `Durante` o `Después`,
 
 | Pendiente | Cantidad / detalle | Prioridad |
 |---|---|---|
-| Videos estándar por respaldar | 69 únicos de hasta 250 MB | Alta |
-| Videos de carga directa | 7 entre 250 MB y 1 GB | Alta |
-| Video fuera del límite actual | 1, `IMG_1935.MOV` (~1.21 GB) | Media; requiere decisión técnica. |
-| Clasificación IA de imágenes | 448 imágenes | Alta |
-| Revisión humana de baja certeza | A determinar después de clasificación | Alta |
+| Videos estándar por respaldar | Ninguno; 109 únicos de hasta 250 MB están verificados | Completado |
+| Videos de carga directa | Completado; 117/117 únicos verificados | Completado |
+| Video fuera del límite actual | Completado; `IMG_1935.MOV` fue transferido internamente y verificado | Completado |
+| Clasificación IA de imágenes | 40 imágenes sin clasificar; servicio de IA no disponible por uso agotado | Alta; reintentar tras resolver disponibilidad. |
+| Revisión humana de baja certeza | 2 imágenes clasificadas como `Pendiente de revisar` y revisión de las 406 clasificaciones de IA | Alta |
 | Propuestas de borrosidad | 30 | Media; nunca automática. |
 | Proyectos, etapas y calendario | Sin configurar | Media |
 | OAuth de Facebook y publicación de prueba | Sin conexión almacenada | Media |
@@ -216,3 +216,43 @@ Crear proyectos de construcción, marcar etapas `Antes`, `Durante` o `Después`,
 ---
 
 **Handoff preparado para continuidad segura.** Si se cambia el entorno, se rota `JWT_SECRET` o se modifica el proveedor de almacenamiento, revisar primero la compatibilidad con los tokens de Facebook cifrados y con los enlaces almacenados de los medios.
+
+## 13. Despliegue real de Hostinger recuperado
+
+La aplicación visible en `https://media.geocarpentry.com` se ejecuta en un VPS de Hostinger; no depende del panel hPanel ni de un flujo de GitHub Actions. La conexión reutilizable está configurada en el equipo local conectado como el alias SSH `alex-vps`. No se incluyen aquí su dirección, usuario, clave privada ni variables de entorno.
+
+| Componente | Configuración verificada |
+|---|---|
+| Código activo | `/opt/geo-media` |
+| Servicio | `geo-media.service` ejecuta `node /opt/geo-media/dist/index.js` |
+| Proxy público | Nginx termina TLS y enruta `media.geocarpentry.com` a `127.0.0.1:3020` |
+| Base de datos local | Contenedor `geo-media-mysql` |
+| Almacenamiento local | Contenedor `geo-media-minio`, con objetos bajo `/opt/geo-media/data/minio` |
+| Configuración sensible | `/opt/geo-media/.env`; no copiar, mostrar ni versionar |
+| Staging actual | `/opt/geo-media-staging-20260818T0632Z` |
+
+Antes de la actualización se creó el punto de restauración local `/opt/geo-media/backups/preupdate-code-db-20260818T0620Z`. Después se verificó el respaldo completo `/opt/geo-media/backups/full-snapshot-20260818T0650Z`: incluye código, base MySQL, una copia protegida del archivo de entorno y una instantánea de MinIO mediante enlaces duros con manifiesto de 41 objetos. Sus checksums de código y base de datos fueron comprobados en el VPS. El almacenamiento de producción no se modificó durante la instantánea.
+
+La compilación actualizada se activó de manera reversible el 18 de agosto de 2026. Se preservaron las versiones anteriores de `dist` y `node_modules` en directorios con el prefijo `preupdate-`. La compatibilidad de acceso abierto de Hostinger se integró de forma explícita mediante `OPEN_ACCESS=true`; si esa variable no está activada, la aplicación conserva el flujo de autenticación habitual. Tras una exposición durante la auditoría, se rotaron en el VPS las credenciales internas de sesión, MySQL, MinIO y el acceso SSH; no se registraron sus valores ni claves. La verificación pública posterior confirmó que `media.geocarpentry.com` responde correctamente. Las credenciales de Meta deben rotarse desde el portal de Meta antes de reutilizar funciones de Facebook.
+
+> **Importante:** Hostinger conserva una biblioteca local distinta, que en la verificación pública contiene 8 medios. El entorno administrado de este proyecto conserva 558 medios verificados. La actualización de código no migra automáticamente esos medios ni sus metadatos entre bases de datos y almacenamientos separados. Cualquier sincronización de los 558 medios requiere una migración dedicada, con una nueva copia de seguridad, verificación SHA-256 y validación de almacenamiento antes de alterar la biblioteca local de Hostinger.
+
+## 14. Estado final de la migración a Hostinger
+
+La migración dedicada ya se completó. **Hostinger es ahora la biblioteca principal visible** en `https://media.geocarpentry.com`, con **565/565 originales verificados**. Los ocho registros que existían previamente se conservaron como deduplicaciones exactas; se incorporaron 550 registros adicionales desde la biblioteca administrada y siete videos locales adicionales mediante transferencia interna verificada. La actualización no eliminó originales, no aprobó limpiezas y no creó publicaciones.
+
+| Verificación | Resultado en Hostinger |
+|---|---:|
+| Originales verificados | 565/565 |
+| Trabajo | 189 |
+| Personal | 173 |
+| Capturas de pantalla | 44 |
+| Videos | 117 |
+| Pendientes de revisión | 42 |
+| Propuestas de limpieza | 30, todas en `Propuesto` |
+
+Las categorías, la fuente de clasificación, la confianza y el estado de revisión se conciliaron sin transferir archivos por segunda vez. Los 408 medios clasificados por IA conservaron su confianza; los 117 videos conservaron clasificación inicial y 40 imágenes continúan sin clasificación por el bloqueo externo del servicio de IA. El manifiesto `HOSTINGER_VIDEO_CHECKSUM_MANIFEST.md` contrasta los siete videos internos por tamaño y SHA-256. Los canales temporales de exportación, importación, conciliación y limpieza se retiraron y sus cuatro rutas responden únicamente con el respaldo HTML del servidor, no con una API operativa.
+
+La ruta `/revision-editorial` añade una vista no publicable de los 189 medios de trabajo. Muestra el proyecto real existente `Obra · febrero de 2019`, mantiene los medios sin proyecto ni etapa hasta una confirmación humana y no ofrece acciones de publicación, calendario ni limpieza.
+
+La única continuación requerida no es de migración: solicitar la reactivación de IA en https://help.manus.im para clasificar las 40 imágenes restantes; revisar manualmente las 30 propuestas de limpieza; y rotar el secreto de Meta antes de volver a habilitar cualquier flujo de publicación. La instrucción vigente del propietario es conservar el token de Meta actual hasta la entrega final y no publicar contenido.
