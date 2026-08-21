@@ -12,7 +12,7 @@
 | PostgreSQL operational memory | Active | Durable plans, events, idempotency, conversation state, and execution receipts |
 | GEO SMS synchronization | Active | Scheduled sanitized synchronization repaired and verified successfully |
 | Controlled SMS adapter | Active | Preview, approval boundary, idempotency, provider receipt, status polling, and delivery verification |
-| Calendar read bridge | Active | Calendar remains authoritative for occupied time |
+| Calendar read bridge | Active | Calendar remains authoritative for occupied time and now supplies sanitized event timing/location metadata to the travel-safety gate |
 | Calendar controlled executor | Active | Create, reschedule, cancel, and project operations require policy-gated approval and verification |
 | Airtable bridge | Active | Controlled schema-aware lead updates and cross-system reconciliation |
 | Hostinger email monitor | Active | Credential routing repaired; classification run completed successfully after repair |
@@ -40,6 +40,9 @@
 - Added deterministic weekday/date grounding for Spanish and English responses and questions. ALEX now corrects a mismatched weekday before presenting it to Jorge.
 - Verified two live read-only flows after deployment: generalized mailbox review and unified client/project priority analysis. Both returned a response, created no plan, executed zero actions, and logged no service error.
 - Expanded the production automated suite to **84/84 passing**, plus **5/5** deterministic email-classification tests.
+- Added a deterministic route-distance safety gate for estimate creation and rescheduling. Same-city commitments remain eligible; geographically distant or unverifiable same-day locations are stopped before a plan is stored.
+- Extended the Calendar bridge without breaking the existing `bookedSlots` contract so ALEX can evaluate verified event start, end, and location internally.
+- Verified the final production suite at **87/87 passing**, both affected services active after restart, and the live Calendar bridge returning valid event metadata without exposing customer details.
 
 ## Verified work completed on 2026-08-18
 
@@ -60,9 +63,10 @@
 
 - The exact content quality of the first primary-mode Telegram response still needs review because the terminal session expired before its log could be inspected.
 - Consequential Calendar, Airtable, email, and SMS actions still require approval and should continue receiving periodic end-to-end smoke tests.
-- Weekday/date labels are now grounded deterministically; route/travel feasibility and every free-slot recommendation still need broader scenario coverage.
+- Route/travel feasibility is now enforced for known appointment actions; additional Wisconsin locations and real drive-time routing remain future enhancements.
 - Legacy documentation contains stale and sometimes contradictory architecture.
 - The repository is public, so this workspace must remain sanitized.
 - A separate history-wide secret audit and credential-rotation review remain required.
 - Existing conversations from before this fix are not automatically reconstructed; new owner dialogue is durable from deployment forward unless a separate sanitized migration is designed.
 - Previously emitted Telegram email alerts are historical and are not retroactively removed; the corrected classifier applies to new monitor cycles.
+
