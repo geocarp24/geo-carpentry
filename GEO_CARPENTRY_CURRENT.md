@@ -1,5 +1,5 @@
 # GEO CARPENTRY — ESTADO ACTUAL DEL PROYECTO
-> Última actualización: 2026-08-17 (Meta Ads aprobadas · GitHub backup automático · NUMERIC_TIME fixes)
+> Última actualización: 2026-08-19 (Review Request handoff escrito · Geo_Leads: 3 clientes elegibles identificados)
 
 ---
 
@@ -134,6 +134,24 @@ Geo Carpentry LLC es un General Contractor en Green Bay, WI (propietario Jorge C
 
 ---
 
+### ✅ COMPLETADO SESIÓN 2026-08-19 — Review Request Agent
+
+1. **Geo_Leads analizado** ✅
+   - 10 records total (no 35 como se estimaba antes)
+   - 3 clientes elegibles (job linked + no DNC): Nedd & Jill Schommer, Robin, Andrea Vandermeulen
+   - 2 excluidos por DNC, 5 sin job linked (leads en pipeline)
+   - Todos los elegibles son English-speaking — ningún cliente ES confirmado aún
+
+2. **HANDOFF_CC_REVIEW_REQUEST_AGENT.md creado** ✅
+   - Archivo: `/opt/alex-bot/agents/review_request/review_request.mjs`
+   - Lógica: filtra en JS (hasJob + !DNC + cooldown 30d + status válido)
+   - SMS en EN y ES via Twilio
+   - Campo nuevo requerido en Airtable: `Review Requested At` (Date)
+   - CC prerequisitos: confirmar Twilio creds + obtener GOOGLE_REVIEW_URL de Jorge
+   - DRY_RUN=true obligatorio en primera ejecución
+
+---
+
 ### ✅ COMPLETADO SESIÓN 2026-08-17 — Meta Ads + GitHub Backup
 
 1. **Meta Ads — $50/semana APROBADO por Jorge** ✅
@@ -218,7 +236,7 @@ Geo Carpentry LLC es un General Contractor en Green Bay, WI (propietario Jorge C
 | 🔴 CC #4 | **Inyectar 30 seeds** en system prompt de `creativo` / `director_v2` | CC | Ver SEEDS_GENERADOR_30_ANGULOS.md |
 | 🔴 CC #5 | Verificar publisher cadence daily en crontab (fue Tue/Fri) | CC | — |
 | 🟡 JORGE | **Activar campañas** en Meta Ads Manager después de que CC cree los ads | Jorge | Después de CC #1 |
-| 🟡 JORGE | **SMS Review Requests** — filtrar Geo_Leads (35 registros) para separar clientes reales | Cowork+Jorge | Próxima sesión |
+| 🔴 CC #6 | **SMS Review Request agent** — build review_request.mjs + crear campo en Airtable | CC | Ver HANDOFF_CC_REVIEW_REQUEST_AGENT.md — 3 clientes elegibles identificados |
 | 🟡 JORGE | Revisar GBP quota case #5-5881000041235 y llenar checkbox en DECISION_NOVA | Jorge | — |
 | 🟡 JORGE | **Make Review Request** — Escenario ID 5893163 INACTIVO | Jorge | Activar + cambiar FROM phone |
 | 🟡 JORGE | Re-autorizar Airtable OAuth en Make.com (expiró 2026-07-05) | Jorge | — |
