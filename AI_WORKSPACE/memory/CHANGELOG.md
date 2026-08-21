@@ -10,6 +10,15 @@
 - Restarted only the ALEX planner service and verified it active with no error-level journal entries.
 - Ran two live read-only requests; neither created a plan nor changed Calendar, Airtable, SMS, email, or WordPress.
 
+## 2026-08-21 — Deterministic same-day travel protection
+
+- Extended the internal Calendar availability response with verified event start, end, and location metadata while preserving the existing occupied-slot contract.
+- Added a deterministic safety gate for estimate creation and rescheduling.
+- Allowed same-city scheduling, rejected excessive known distance, and failed conservatively when two different locations could not be verified.
+- Prevented unsafe actions before plan persistence and replaced them with one concise resolution question.
+- Verified 87/87 production tests, active services after restart, and a live privacy-safe Calendar bridge check.
+- Preserved a timestamped rollback backup. WordPress and customer records were not modified.
+
 ## 2026-08-21 — Durable ALEX conversational memory
 
 - Connected owner Telegram dialogue to the existing PostgreSQL conversation-memory model.
@@ -60,3 +69,4 @@
 ## Documentation rule
 
 Every future entry must state date, affected component, change, reason, verification, remaining risk, and rollback or recovery note when applicable.
+
