@@ -2,9 +2,10 @@
 
 ## Critical
 
-1. Run periodic approved-action smoke tests across Calendar, Airtable, email, and controlled SMS; the current read-only primary-route reconciliation tests are complete.
-2. Audit the public repository history and current files for accidentally committed secrets or sensitive configuration references.
-3. Rotate any credential that was ever placed in a chat, memory document, archive, or public commit.
+1. Run one owner-approved Telegram smoke test of the whole-Trash plan, approval, execution, and verification flow; no production email was deleted during implementation.
+2. Run periodic approved-action smoke tests across Calendar, Airtable, email, and controlled SMS; the current read-only primary-route reconciliation tests are complete.
+3. Audit the public repository history and current files for accidentally committed secrets or sensitive configuration references.
+4. Rotate any credential that was ever placed in a chat, memory document, archive, or public commit.
 
 ## High priority
 
