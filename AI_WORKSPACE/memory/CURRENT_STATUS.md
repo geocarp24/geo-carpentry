@@ -1,6 +1,6 @@
 # Current Status
 
-**As of:** 2026-08-21  
+**As of:** 2026-08-22  
 **Confidence:** verified through live two-turn conversation testing, database persistence checks, service health checks, and automated tests where noted.
 
 ## Operational components
@@ -17,6 +17,17 @@
 | Airtable bridge | Active | Controlled schema-aware lead updates and cross-system reconciliation |
 | Hostinger email monitor | Active | Credential routing repaired; classification run completed successfully after repair |
 | WordPress | Production; protected | No updates or direct changes were made during this work block |
+
+## Verified work completed on 2026-08-22
+
+- Diagnosed a recurring Telegram/email deadlock from production evidence rather than prompt tuning.
+- Corrected malformed planner questions that could be stored as character-indexed objects and poison later conversation turns.
+- Added defensive normalization so any older malformed pending question is ignored instead of trapping the assistant.
+- Added a controlled whole-Trash email action: ALEX may propose deleting the complete verified Trash set in one approval-gated plan instead of repeatedly exposing only the latest page.
+- Added an exact-count execution guard. If Trash changes after approval, execution fails closed and requires a new plan.
+- Improved Telegram error reporting so sanitized server error codes are retained for diagnosis instead of being replaced by an opaque HTTP error.
+- Verified **91/91 production tests**, Python syntax, both affected services active after restart, and a live read-only Trash count. No email was deleted.
+- WordPress was not modified.
 
 ## Verified work completed on 2026-08-21
 
@@ -68,5 +79,6 @@
 - The repository is public, so this workspace must remain sanitized.
 - A separate history-wide secret audit and credential-rotation review remain required.
 - Existing conversations from before this fix are not automatically reconstructed; new owner dialogue is durable from deployment forward unless a separate sanitized migration is designed.
+- Permanent deletion remains intentionally approval-gated. The newly repaired whole-Trash flow still needs one owner-driven Telegram approval/execution smoke test before it is considered fully proven end to end.
 - Previously emitted Telegram email alerts are historical and are not retroactively removed; the corrected classifier applies to new monitor cycles.
 
