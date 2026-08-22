@@ -2,6 +2,14 @@
 
 **Status:** production primary assistant with controlled execution and rollback compatibility.
 
+## Email deletion safety and conversation-state resilience (2026-08-22)
+
+- Pending clarifying questions have one durable object shape; malformed historical values are treated as absent rather than replayed indefinitely.
+- A request to empty Trash is represented as one approval-gated action with an exact verified mailbox total.
+- Execution re-reads the full Trash UID set and fails closed if the mailbox changed after approval.
+- Permanent deletion is never performed during planning and is never automatic.
+- Telegram retains sanitized internal error codes so operational failures are diagnosable without exposing secrets.
+
 ## Purpose
 
 ALEX is Jorge's operating assistant for Geo Carpentry. Its job is to understand ongoing work, surface priorities, organize communication, prepare safe plans, and execute consequential actions only after the required approval.
