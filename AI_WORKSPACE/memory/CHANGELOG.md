@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-08-22 — ALEX stuck-state and whole-Trash repair
+
+- Root cause: planner questions were not type-normalized; a plain string could be spread into numeric character keys and persisted as the pending question, corrupting conversational state.
+- Root cause: email context exposed only a recent page while the requested operation targeted the complete Trash mailbox, causing repeated confirmations and incomplete plans.
+- Normalized planner questions before grounding and persistence, and ignored malformed historical pending state safely.
+- Added an approval-gated whole-Trash action with a verified total and an execution-time count guard.
+- Preserved individual-message permanent deletion behavior and all existing approval/idempotency controls.
+- Preserved sanitized server errors in the Telegram bridge for actionable diagnostics.
+- Verified Python syntax, 91/91 production tests, active services, and live read-only mailbox access. No email, Calendar event, Airtable record, SMS, or WordPress content was changed.
+- Recovery copies of the affected production files were created before modification.
+
 ## 2026-08-21 — Superagent core: unified memory, generalized email search, and date grounding
 
 - Replaced fixed LinkedIn/Indeed-only mailbox term detection with natural-language extraction for senders, addresses, quoted subjects, and topics.
