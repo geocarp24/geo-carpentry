@@ -1,5 +1,13 @@
 # Production coordination and ALEX promotion — 2026-08-18
 
+## Recurring stuck-state repair — 2026-08-22
+
+Production logs showed an HTTP 400 during a Telegram confirmation and an opaque client-side error. Database inspection then exposed a malformed pending question represented by numeric character keys. The same dialogue also showed a scope mismatch: ALEX could see only the most recent page of Trash while Jorge had asked to act on the complete mailbox.
+
+The planner contract and response grounding now normalize questions into a stable object shape. Repository reads reject malformed historical state. The email worker now supports a single approval-gated whole-Trash operation only when it carries the exact verified total; immediately before deletion it re-reads every UID and refuses the operation if the count changed. The Telegram bridge retains a sanitized server error code for future diagnosis.
+
+Verification was completed with four focused regressions, the full 91-test production suite, Python syntax validation, service restart/health checks, and a live read-only Trash count. No destructive email action was executed. WordPress was not modified. Timestamped recovery copies remain on the production server.
+
 ## Superagent core completion — 2026-08-21
 
 - Root cause found: client/project/memory tables existed, but operational context exposed only a thin last-message record; mailbox search extraction was restricted to two hard-coded providers.
