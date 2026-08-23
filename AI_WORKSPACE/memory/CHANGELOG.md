@@ -14,6 +14,9 @@
 - Added balanced-object JSON extraction with full contract validation.
 - Added a deterministic whole-Trash planner so this critical, fully specified operation no longer depends on probabilistic model formatting.
 - Verified the exact production wording creates one approval-gated plan with no execution, 93/93 tests pass, and both services are active.
+- Fixed `/aprobar` and `/ejecutar` without UUID: the bot records plan references in conversation state and falls back to an owner-scoped, status-specific persistent lookup after restarts.
+- Latest-plan lookup is read-only and cannot approve or execute by itself.
+- Verified a real post-restart lookup returned one valid pending plan with zero executed actions.
 
 ## 2026-08-21 — Superagent core: unified memory, generalized email search, and date grounding
 
