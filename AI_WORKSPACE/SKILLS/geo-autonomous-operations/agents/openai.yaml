@@ -1,0 +1,4 @@
+interface:
+  display_name: "Geo Autonomous Operations"
+  short_description: "Avanza, verifica y documenta sin pausas"
+  default_prompt: "Use $geo-autonomous-operations to continue Geo Carpentry work autonomously and ask only for a concrete blocker."
