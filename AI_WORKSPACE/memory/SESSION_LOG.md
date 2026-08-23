@@ -14,6 +14,10 @@ The owner then repeated the exact whole-Trash request through Telegram and recei
 
 The provider now extracts one balanced JSON object and still passes it through the complete proposal and capability policy. More importantly, the explicit whole-Trash intent is deterministic: it uses the verified Trash total, prepares one approval-gated action, and never calls the language model. After deployment, the exact request prepared one plan for the full verified set with zero executed actions. Final suite: 93/93 passing; services active; no new errors; no email deleted.
 
+### Shorthand approval continuity
+
+The next real Telegram turn showed that plan preparation worked, but `/aprobar` without the displayed UUID failed because the bot never retained the plan reference. The bridge now remembers proposed and approved references for immediate commands. A read-only server lookup also recovers the latest owner-scoped plan with the required status after a restart. Execution shorthand only resolves an already approved plan; it cannot use a merely proposed plan. Syntax, focused shortcut tests, the 93-test application suite, service health, and a real post-restart lookup all passed. No approval or deletion was performed during verification.
+
 ## Superagent core completion — 2026-08-21
 
 - Root cause found: client/project/memory tables existed, but operational context exposed only a thin last-message record; mailbox search extraction was restricted to two hard-coded providers.
