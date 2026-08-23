@@ -11,6 +11,7 @@
 - Telegram retains sanitized internal error codes so operational failures are diagnosable without exposing secrets.
 - Anthropic responses may contain explanatory prose; ALEX extracts one balanced JSON object and still validates it against the complete planner contract and capability policy.
 - Explicit whole-Trash requests use a deterministic planner based on the verified mailbox total, so this critical operation does not depend on LLM formatting or availability.
+- Telegram shorthand commands remember the last proposed/approved plan. After a restart, a read-only owner-scoped and status-specific lookup recovers the appropriate reference; `/ejecutar` never resolves a merely proposed plan.
 
 ## Purpose
 
