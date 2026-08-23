@@ -28,6 +28,11 @@
 - Improved Telegram error reporting so sanitized server error codes are retained for diagnosis instead of being replaced by an opaque HTTP error.
 - Verified **91/91 production tests**, Python syntax, both affected services active after restart, and a live read-only Trash count. No email was deleted.
 - WordPress was not modified.
+- A later real Telegram attempt exposed a second, independent failure: Anthropic returned explanatory prose around the required JSON, both retries failed parsing, and no production fallback planner was configured.
+- Hardened the Anthropic response parser to extract and validate one balanced JSON object from prose or Markdown without weakening the capability policy.
+- Removed the whole-Trash operation from model dependence: this explicit intent is now planned deterministically from the verified mailbox total and remains approval-gated.
+- Reproduced the exact owner wording after deployment. Production prepared one plan for the complete verified Trash set, executed zero actions, and deleted zero emails.
+- Final verification after this second repair: **93/93 tests passing**, both services active, and no new error entries.
 
 ## Verified work completed on 2026-08-21
 
