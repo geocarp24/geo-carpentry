@@ -1,0 +1,90 @@
+# Changelog
+
+## 2026-08-22 — ALEX stuck-state and whole-Trash repair
+
+- Root cause: planner questions were not type-normalized; a plain string could be spread into numeric character keys and persisted as the pending question, corrupting conversational state.
+- Root cause: email context exposed only a recent page while the requested operation targeted the complete Trash mailbox, causing repeated confirmations and incomplete plans.
+- Normalized planner questions before grounding and persistence, and ignored malformed historical pending state safely.
+- Added an approval-gated whole-Trash action with a verified total and an execution-time count guard.
+- Preserved individual-message permanent deletion behavior and all existing approval/idempotency controls.
+- Preserved sanitized server errors in the Telegram bridge for actionable diagnostics.
+- Verified Python syntax, 91/91 production tests, active services, and live read-only mailbox access. No email, Calendar event, Airtable record, SMS, or WordPress content was changed.
+- Recovery copies of the affected production files were created before modification.
+- Follow-up root cause: Anthropic returned valid proposal JSON wrapped in explanatory prose; the strict parser rejected both attempts and there was no configured fallback provider.
+- Added balanced-object JSON extraction with full contract validation.
+- Added a deterministic whole-Trash planner so this critical, fully specified operation no longer depends on probabilistic model formatting.
+- Verified the exact production wording creates one approval-gated plan with no execution, 93/93 tests pass, and both services are active.
+- Fixed `/aprobar` and `/ejecutar` without UUID: the bot records plan references in conversation state and falls back to an owner-scoped, status-specific persistent lookup after restarts.
+- Latest-plan lookup is read-only and cannot approve or execute by itself.
+- Verified a real post-restart lookup returned one valid pending plan with zero executed actions.
+
+## 2026-08-21 — Superagent core: unified memory, generalized email search, and date grounding
+
+- Replaced fixed LinkedIn/Indeed-only mailbox term detection with natural-language extraction for senders, addresses, quoted subjects, and topics.
+- Enriched operational client records with recent conversation messages, active durable memories, projects, email identity, pending questions, and Airtable linkage.
+- Added high/medium/normal priority and deterministic recommended-next-action signals.
+- Added automatic correction of mismatched Spanish and English weekday/date combinations in both responses and clarifying questions.
+- Added regression tests and verified the complete production suite at 84/84 passing.
+- Restarted only the ALEX planner service and verified it active with no error-level journal entries.
+- Ran two live read-only requests; neither created a plan nor changed Calendar, Airtable, SMS, email, or WordPress.
+
+## 2026-08-21 — Deterministic same-day travel protection
+
+- Extended the internal Calendar availability response with verified event start, end, and location metadata while preserving the existing occupied-slot contract.
+- Added a deterministic safety gate for estimate creation and rescheduling.
+- Allowed same-city scheduling, rejected excessive known distance, and failed conservatively when two different locations could not be verified.
+- Prevented unsafe actions before plan persistence and replaced them with one concise resolution question.
+- Verified 87/87 production tests, active services after restart, and a live privacy-safe Calendar bridge check.
+- Preserved a timestamped rollback backup. WordPress and customer records were not modified.
+
+## 2026-08-21 — Durable ALEX conversational memory
+
+- Connected owner Telegram dialogue to the existing PostgreSQL conversation-memory model.
+- Persisted inbound and outbound turns with idempotent external message identifiers.
+- Added conversation summaries, pending-question state, and optimistic revisions.
+- Ensured normal primary-mode text and voice reach ALEX before legacy conversational handlers.
+- Added regression coverage and verified 72/72 production tests.
+- Verified two-turn continuity and four persisted messages in one conversation without external mutations.
+- Added a reusable autonomous-execution skill and workspace instruction.
+- Preserved timestamped production rollback backups.
+- WordPress was not modified.
+
+## 2026-08-21 — Email classification, search, and named-folder plans
+
+- Replaced broad raw-message keyword precedence with sender- and subject-aware classification.
+- Suppressed job networks, ranking offers, nomination marketing, lead sellers, and drafting/estimating solicitations as low-priority promotions.
+- Restricted permit, security, finance, and customer-lead alerts to stronger evidence.
+- Added read-only mailbox search and exact provider counts.
+- Added an approval-gated named-folder move using compact verified search terms and an expected-count guard.
+- Added batch IMAP execution and post-move count verification for large result sets.
+- Verified 75/75 application tests and 5/5 classifier regressions.
+- Verified a live count request and a non-executed `Jobs` plan through ALEX.
+- WordPress and mailbox contents were not modified.
+
+## 2026-08-18 — SMS delivery verification and ALEX primary promotion
+
+- Verified a controlled provider SMS was delivered after correcting a transcribed recipient-number error.
+- Changed ALEX SMS behavior so provider acceptance alone is insufficient; verified delivery is required before success is reported.
+- Recorded 77/77 passing local tests and 71/71 passing production tests.
+- Repaired authorization drift affecting the scheduled GEO SMS synchronization and Hostinger email-monitor workers.
+- Verified both scheduled workers complete successfully after repair.
+- Promoted the controlled ALEX planner to the primary Telegram text and voice route.
+- Added `/alex` as an explicit alias and preserved `/alex2` as a fallback.
+- Preserved approval and execution command compatibility.
+- Confirmed a command-free primary-mode Telegram request received a response.
+- Created timestamped rollback backups before production code and configuration changes.
+- WordPress was not modified.
+
+## 2026-08-17 — Universal AI memory initialized
+
+- Created a vendor-neutral, public-safe memory workspace.
+- Added mandatory AI entry instructions and security boundaries.
+- Documented the current ALEX, GEO SMS, Calendar, Airtable, email, and memory architecture.
+- Recorded the 2026-08-17 ALEX hardening work and verified 62/62 tests.
+- Documented known limitations and prioritized next work.
+- Explicitly excluded secret values, client PII, private contracts, financial records, and raw production dumps.
+
+## Documentation rule
+
+Every future entry must state date, affected component, change, reason, verification, remaining risk, and rollback or recovery note when applicable.
+
