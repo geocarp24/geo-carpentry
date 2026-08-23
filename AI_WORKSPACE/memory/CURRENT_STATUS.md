@@ -33,6 +33,9 @@
 - Removed the whole-Trash operation from model dependence: this explicit intent is now planned deterministically from the verified mailbox total and remains approval-gated.
 - Reproduced the exact owner wording after deployment. Production prepared one plan for the complete verified Trash set, executed zero actions, and deleted zero emails.
 - Final verification after this second repair: **93/93 tests passing**, both services active, and no new error entries.
+- Corrected command continuity: Telegram now remembers the latest proposed and approved plan, so `/aprobar` and `/ejecutar` may omit the UUID during a normal conversation.
+- Added persistent recovery of the latest owner-scoped plan by exact status, allowing the shorthand commands to survive a bot restart without selecting another owner's plan or executing during lookup.
+- Verified after restarting both services that the latest pending plan is recovered with a valid identifier, `safeToMutate:false`, and zero executed actions.
 
 ## Verified work completed on 2026-08-21
 
