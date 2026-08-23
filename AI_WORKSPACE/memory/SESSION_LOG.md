@@ -8,6 +8,12 @@ The planner contract and response grounding now normalize questions into a stabl
 
 Verification was completed with four focused regressions, the full 91-test production suite, Python syntax validation, service restart/health checks, and a live read-only Trash count. No destructive email action was executed. WordPress was not modified. Timestamped recovery copies remain on the production server.
 
+### Follow-up failure and architectural repair
+
+The owner then repeated the exact whole-Trash request through Telegram and received another safe failure. Production evidence showed a different cause: both Anthropic attempts returned explanatory prose around the proposal object, the provider parser required the entire response to be JSON, and the application had no configured fallback provider. Two new failing regressions captured both the prose-wrapped response and a failed-LLM whole-Trash request.
+
+The provider now extracts one balanced JSON object and still passes it through the complete proposal and capability policy. More importantly, the explicit whole-Trash intent is deterministic: it uses the verified Trash total, prepares one approval-gated action, and never calls the language model. After deployment, the exact request prepared one plan for the full verified set with zero executed actions. Final suite: 93/93 passing; services active; no new errors; no email deleted.
+
 ## Superagent core completion — 2026-08-21
 
 - Root cause found: client/project/memory tables existed, but operational context exposed only a thin last-message record; mailbox search extraction was restricted to two hard-coded providers.
