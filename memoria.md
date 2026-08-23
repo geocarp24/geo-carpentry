@@ -21,6 +21,8 @@
 | Owner | **Jorge Cruz** — bilingual EN/ES, leads all work personally |
 | Team | Bilingual EN/ES crew |
 | Tagline | **"Built to Last. Crafted with Pride."** |
+| Address | **735 E Walnut St Suite 3, Green Bay, WI** (current). The New London
+  address on the DSPS license PDFs is a former address, Jorge moved years ago. |
 | Phone | (920) 367-1272 |
 | WhatsApp | +1 920 934 0351 |
 | Email | admin@geocarpentry.com |
@@ -41,7 +43,10 @@
 
 ### What Geo Carpentry does NOT do (do not write copy implying otherwise)
 - **No custom cabinet making / custom woodwork from scratch.** Jorge installs, remodels, and finishes — does not run a cabinet shop. Any mention of "custom woodwork" or "custom cabinets" is a regression and was removed in May 2026.
-- No commercial / industrial scale work (residential focus).
+- **Corrected 2026-08-18 by Jorge: Geo Carpentry DOES do commercial construction.**
+  An earlier version of this file said otherwise and that error propagated into
+  agent filters, which were suppressing real commercial search queries. Industrial
+  scale work is still unconfirmed, so do not claim it without asking.
 
 ---
 
