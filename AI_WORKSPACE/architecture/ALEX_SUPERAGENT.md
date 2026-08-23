@@ -9,6 +9,8 @@
 - Execution re-reads the full Trash UID set and fails closed if the mailbox changed after approval.
 - Permanent deletion is never performed during planning and is never automatic.
 - Telegram retains sanitized internal error codes so operational failures are diagnosable without exposing secrets.
+- Anthropic responses may contain explanatory prose; ALEX extracts one balanced JSON object and still validates it against the complete planner contract and capability policy.
+- Explicit whole-Trash requests use a deterministic planner based on the verified mailbox total, so this critical operation does not depend on LLM formatting or availability.
 
 ## Purpose
 
