@@ -10,6 +10,10 @@
 - Preserved sanitized server errors in the Telegram bridge for actionable diagnostics.
 - Verified Python syntax, 91/91 production tests, active services, and live read-only mailbox access. No email, Calendar event, Airtable record, SMS, or WordPress content was changed.
 - Recovery copies of the affected production files were created before modification.
+- Follow-up root cause: Anthropic returned valid proposal JSON wrapped in explanatory prose; the strict parser rejected both attempts and there was no configured fallback provider.
+- Added balanced-object JSON extraction with full contract validation.
+- Added a deterministic whole-Trash planner so this critical, fully specified operation no longer depends on probabilistic model formatting.
+- Verified the exact production wording creates one approval-gated plan with no execution, 93/93 tests pass, and both services are active.
 
 ## 2026-08-21 — Superagent core: unified memory, generalized email search, and date grounding
 
