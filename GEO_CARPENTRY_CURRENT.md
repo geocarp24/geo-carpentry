@@ -1,5 +1,5 @@
 # GEO CARPENTRY — ESTADO ACTUAL DEL PROYECTO
-> Última actualización: 2026-08-19 (Review Request handoff escrito · Geo_Leads: 3 clientes elegibles identificados)
+> Última actualización: 2026-08-22 (GeoBudget Deck — 8 correcciones de materiales aplicadas)
 
 ---
 
@@ -134,6 +134,24 @@ Geo Carpentry LLC es un General Contractor en Green Bay, WI (propietario Jorge C
 
 ---
 
+### ✅ COMPLETADO SESIÓN 2026-08-22 — GeoBudget Deck + Build fixes
+
+**Archivo:** `budget/deck/index.html` — listo para subir a Hostinger
+
+1. **Dumpster fee** ✅ — $450 (consistente con roofing app, se activa solo cuando include-tearoff está checked)
+2. **Joist Hanger** ✅ — `2x4` → `2x8` (match con joists PT 2x8x12), precio $1.15 → $2.15
+3. **Post Base** ✅ — `4x4` → `6x6` (match con posts PT 6x6x10), precio $12.80 → $21.35
+4. **Rail Posts 4x4** ✅ — WoodTraditional ahora calcula 1 post cada 6ft + 1 en cada extremo (PT 4x4x8, $9.95 ea)
+5. **Top + Bottom Rail** ✅ — PT 2x4x12 (12ft piezas), `ceil(railLf/12)` piezas cada uno ($5.15 ea)
+6. **WoodTraditional blended rate** ✅ — `horizontalMaterialPerLf` $7.00 → $0.50 (misc hardware; boards/posts ahora explícitos)
+7. **PVC/Aluminum railing** ✅ — muestra número de paneles (e.g. "7 panel") en vez de LF
+8. **Concreto footings** ✅ — ya no es 1 bolsa/footing; calcula volumen real de sonotube:
+   - Inputs nuevos: Sonotube Diameter (default 16") + Footing Depth (default 48")
+   - Formula: `π × r² × h ÷ 0.375 cu ft` → **15 bolsas** para 16"×48" estándar
+   - Save/load/reset actualizados para ambos inputs
+
+---
+
 ### ✅ COMPLETADO SESIÓN 2026-08-19 — Review Request Agent
 
 1. **Geo_Leads analizado** ✅
@@ -147,7 +165,9 @@ Geo Carpentry LLC es un General Contractor en Green Bay, WI (propietario Jorge C
    - Lógica: filtra en JS (hasJob + !DNC + cooldown 30d + status válido)
    - SMS en EN y ES via Twilio
    - Campo nuevo requerido en Airtable: `Review Requested At` (Date)
-   - CC prerequisitos: confirmar Twilio creds + obtener GOOGLE_REVIEW_URL de Jorge
+   - GOOGLE_REVIEW_URL ✅ confirmado 2026-08-23: `https://g.page/r/CW11zSNR9BL0EBM/review`
+   - Trigger: manual desde CRM app (no cron automático) — botón en UI por job
+   - CC prerequisitos: confirmar Twilio creds
    - DRY_RUN=true obligatorio en primera ejecución
 
 ---

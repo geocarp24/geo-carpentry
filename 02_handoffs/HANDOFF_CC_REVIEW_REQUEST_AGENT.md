@@ -1,50 +1,57 @@
-# HANDOFF CC — review_request.mjs (VPS SMS Review Agent)
+# HANDOFF CC — review_request.mjs (SMS/Email Review Request — Manual desde CRM)
 
-**Fecha:** 2026-08-19  
-**Para:** Claude Code (CC) en VPS  
-**Estado:** LISTO para implementar  
-**Prioridad:** CC #2 (después de meta_ads.mjs)
+**Fecha:** 2026-08-23 (rediseñado)
+**Para:** Claude Code (CC) en VPS
+**Estado:** LISTO para implementar
+**Prioridad:** CC #6
 
 ---
 
 ## OBJETIVO
 
-Enviar SMS de solicitud de Google Review a clientes confirmados de Geo Carpentry. Solo a clientes reales (con Job linked en Airtable), nunca a leads fríos, nunca a DNC.
+Cuando Jorge marca un job como completado en el CRM, presiona un botón "Request Review" que dispara este agente vía webhook. El agente envía un SMS + email a ese cliente pidiendo Google Review. **No es cron — es disparo manual por job.**
 
 ---
 
-## ARCHIVO A CREAR
+## FLUJO COMPLETO
 
 ```
-/opt/alex-bot/agents/review_request/review_request.mjs
+CRM UI (botón "Request Review" en record del cliente)
+  → POST /trigger en VPS puerto 3003
+    { tenant: 'geo-carpentry', agent: 'review_request', lead_id: 'rec...' }
+  → review_request.mjs recibe lead_id
+  → fetch record de Airtable Geo_Leads
+  → validar (DNC, cooldown 30d)
+  → enviar SMS vía Twilio + email (si tiene email)
+  → actualizar "Review Requested At" en Airtable
+  → responder { ok: true } al webhook
 ```
 
 ---
 
-## PREREQUISITOS (verificar antes de codear)
+## ARCHIVOS A CREAR / MODIFICAR
 
-### 1. Credenciales SMS en VPS `.env`
-El agente necesita Twilio u otro proveedor SMS. Verificar en `/opt/alex-bot/.env`:
-```
+1. **CREAR:** `/opt/alex-bot/agents/review_request/review_request.mjs`
+2. **MODIFICAR:** El webhook router (`/opt/geo-webhook/`) para enrutar `agent: 'review_request'`
+3. **MODIFICAR (UI):** Agregar botón "Request Review" en el CRM — ver sección UI abajo
+
+---
+
+## PREREQUISITOS
+
+### 1. Credenciales en `/opt/alex-bot/.env`
+```bash
 TWILIO_ACCOUNT_SID=...
 TWILIO_AUTH_TOKEN=...
 TWILIO_FROM_NUMBER=+1XXXXXXXXXX
+GOOGLE_REVIEW_URL=https://g.page/r/CW11zSNR9BL0EBM/review   # ✅ confirmado Jorge 2026-08-23
 ```
-Si no existe Twilio configurado → reportar a Jorge antes de continuar.
+Si Twilio no está configurado → reportar a Jorge antes de continuar.
 
-### 2. Google Review URL
-Agregar a `/opt/alex-bot/.env`:
-```
-GOOGLE_REVIEW_URL=https://g.page/r/[PLACE_ID]/review
-```
-Jorge debe proveer el Place ID o el link completo. Pedírselo antes de primera ejecución.
-
-### 3. Campo nuevo en Airtable (Geo_Leads)
-CC debe crear este campo vía API o desde Airtable UI:
-- **Tabla:** `tblaH41HWeVG9ZXLn` (Geo_Leads)
+### 2. Campo nuevo en Airtable Geo_Leads (`tblaH41HWeVG9ZXLn`)
 - **Nombre:** `Review Requested At`
-- **Tipo:** Date (include time: false)
-- **Propósito:** Prevenir re-envíos dentro de 30 días
+- **Tipo:** Date
+- **Propósito:** cooldown — no re-enviar dentro de 30 días al mismo cliente
 
 ---
 
@@ -54,73 +61,67 @@ CC debe crear este campo vía API o desde Airtable UI:
 import { readFile } from 'fs/promises';
 
 const tenantConfig = JSON.parse(
-  await readFile(`/opt/alex-bot/agents/tenants/geo-carpentry.json`, 'utf8')
+  await readFile('/opt/alex-bot/agents/tenants/geo-carpentry.json', 'utf8')
 );
 const airtableToken = process.env[tenantConfig.airtable.token_env]; // AIRTABLE_TOKEN_GEO
 const BASE_ID = tenantConfig.airtable.base_id; // appAQpveuAec077jF
+const LEADS_TABLE = 'tblaH41HWeVG9ZXLn';
+const GOOGLE_REVIEW_URL = process.env.GOOGLE_REVIEW_URL;
 ```
 
 ---
 
-## LÓGICA DEL AGENTE
+## AGENTE: review_request.mjs
 
-### Paso 1: Fetch Geo_Leads
+El agente recibe el `lead_id` como argumento (pasado por el webhook router):
+
+```javascript
+// El webhook router llama: node review_request.mjs rec6NOxpJuKTiCfBF
+const lead_id = process.argv[2];
+if (!lead_id) throw new Error('lead_id requerido como argumento');
+```
+
+### Paso 1: Fetch record específico
 
 ```javascript
 const res = await fetch(
-  `https://api.airtable.com/v0/${BASE_ID}/tblaH41HWeVG9ZXLn?` +
-  new URLSearchParams({ pageSize: '100' }),
+  `https://api.airtable.com/v0/${BASE_ID}/${LEADS_TABLE}/${lead_id}`,
   { headers: { Authorization: `Bearer ${airtableToken}` } }
 );
-const { records } = await res.json();
+const record = await res.json();
+const f = record.fields;
 ```
 
-### Paso 2: Filtrar elegibles en JS
+### Paso 2: Validaciones de seguridad
 
 ```javascript
-const SKIP_STATUSES = ['Not Interested', 'DNC', 'Spam'];
-const COOLDOWN_DAYS = 30;
+// Field IDs de Geo_Leads:
+// fldUTOYSri5bcXSVQ → DNC (boolean)
+// fldytSAwcOBwqwUd2 → Status
+// flduFtNu4dyhfeBbg → Jobs linked (array)
+// fldpKCnwHhMYvREDj → Phone
+// fldUqmulwBHGQCcxh → Name
+// fld5vXtGIvU1unHuR → Language
+// "Review Requested At" → fecha último envío (anotar field ID al crear)
 
-const eligible = records.filter(r => {
-  const f = r.cellValuesByFieldId ?? r.fields;
+const DNC = f['fldUTOYSri5bcXSVQ'] === true;
+if (DNC) throw new Error('BLOCKED: cliente en DNC');
 
-  // Debe tener job linked
-  const hasJob = (f['flduFtNu4dyhfeBbg'] ?? []).length > 0;
-  if (!hasJob) return false;
+const lastRequest = f['Review Requested At'];
+if (lastRequest) {
+  const daysSince = (Date.now() - new Date(lastRequest).getTime()) / 86400000;
+  if (daysSince < 30) throw new Error(`BLOCKED: enviado hace ${Math.floor(daysSince)} días (cooldown 30d)`);
+}
 
-  // No DNC
-  if (f['fldUTOYSri5bcXSVQ'] === true) return false;
-
-  // Status válido
-  const status = f['fldytSAwcOBwqwUd2']?.name ?? f['fldytSAwcOBwqwUd2'] ?? '';
-  if (SKIP_STATUSES.includes(status)) return false;
-
-  // Cooldown de 30 días
-  const lastRequest = f['Review Requested At']; // nombre del campo nuevo
-  if (lastRequest) {
-    const daysSince = (Date.now() - new Date(lastRequest).getTime()) / 86400000;
-    if (daysSince < COOLDOWN_DAYS) return false;
-  }
-
-  return true;
-});
+const hasJob = (f['flduFtNu4dyhfeBbg'] ?? []).length > 0;
+if (!hasJob) throw new Error('BLOCKED: sin job linked');
 ```
-
-**Nota sobre field IDs vs field names:** Los registros devuelven field IDs si se usa `cellValuesByFieldId`. El campo `Review Requested At` (nuevo) — usar su field name o field ID una vez creado. Para los campos existentes, los IDs son:
-- `fldpKCnwHhMYvREDj` → teléfono (formato: "19204285771" o "+17077060205")
-- `fldUqmulwBHGQCcxh` → nombre del lead
-- `fld5vXtGIvU1unHuR` → language (`{name: "English"}` o `{name: "Spanish"}`)
-- `fldUTOYSri5bcXSVQ` → DNC (boolean)
-- `fldytSAwcOBwqwUd2` → Status (`{name: "Offer Approved"}`)
-- `flduFtNu4dyhfeBbg` → Jobs linked (array de `{id, name}`)
 
 ### Paso 3: Normalizar teléfono
 
 ```javascript
 function normalizePhone(raw) {
-  // Quitar todo excepto dígitos y +
   let digits = String(raw).replace(/[^\d]/g, '');
-  // Asegurar E.164 para Twilio
   if (digits.length === 10) digits = '1' + digits;
   return '+' + digits;
 }
@@ -129,14 +130,12 @@ function normalizePhone(raw) {
 ### Paso 4: Templates SMS
 
 ```javascript
-const GOOGLE_REVIEW_URL = process.env.GOOGLE_REVIEW_URL;
-
-function buildMessage(name, lang) {
+function buildSMS(name, lang) {
   const firstName = name?.split(' ')[0] ?? 'there';
   if (lang === 'Spanish') {
-    return `¡Hola ${firstName}! Soy Jorge de Geo Carpentry. Fue un placer trabajar en su proyecto. Si quedó contento con el resultado, agradecería mucho una reseña rápida en Google — ayuda mucho a nuestro pequeño negocio. ${GOOGLE_REVIEW_URL} ¡Muchas gracias!`;
+    return `¡Hola ${firstName}! Soy Jorge de Geo Carpentry. Fue un placer trabajar en su proyecto. Si quedó contento, le agradecería mucho una reseña rápida en Google — ayuda mucho a nuestro pequeño negocio. ${GOOGLE_REVIEW_URL} ¡Gracias!`;
   }
-  return `Hi ${firstName}! It's Jorge from Geo Carpentry. We really enjoyed working on your project. If you're happy with the results, a quick Google review would mean the world to us — it really helps our small business. ${GOOGLE_REVIEW_URL} Thanks so much!`;
+  return `Hi ${firstName}! It's Jorge from Geo Carpentry. We really enjoyed working on your project. If you're happy with the results, a quick Google review would mean the world to us. ${GOOGLE_REVIEW_URL} Thanks so much!`;
 }
 ```
 
@@ -144,13 +143,12 @@ function buildMessage(name, lang) {
 
 ```javascript
 import twilio from 'twilio';
-
 const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 async function sendSMS(to, body) {
   if (process.env.DRY_RUN === 'true') {
-    console.log(`[DRY_RUN] TO: ${to} | MSG: ${body}`);
-    return { status: 'dry_run' };
+    console.log(`[DRY_RUN] TO: ${to}\nMSG: ${body}`);
+    return { sid: 'dry_run' };
   }
   return await client.messages.create({
     from: process.env.TWILIO_FROM_NUMBER,
@@ -163,11 +161,10 @@ async function sendSMS(to, body) {
 ### Paso 6: Actualizar `Review Requested At` en Airtable
 
 ```javascript
-async function markRequested(recordId, fieldId) {
+async function markRequested(recordId, reviewFieldId) {
   if (process.env.DRY_RUN === 'true') return;
-
   await fetch(
-    `https://api.airtable.com/v0/${BASE_ID}/tblaH41HWeVG9ZXLn/${recordId}`,
+    `https://api.airtable.com/v0/${BASE_ID}/${LEADS_TABLE}/${recordId}`,
     {
       method: 'PATCH',
       headers: {
@@ -175,104 +172,111 @@ async function markRequested(recordId, fieldId) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        fields: { [fieldId]: new Date().toISOString().slice(0, 10) }, // YYYY-MM-DD
+        fields: { [reviewFieldId]: new Date().toISOString().slice(0, 10) },
       }),
     }
   );
 }
 ```
 
-`fieldId` = el field ID de `Review Requested At` una vez creado en Airtable.
+`reviewFieldId` = field ID de `Review Requested At` una vez creado. Anotarlo en este handoff.
 
-### Paso 7: Loop principal
+### Paso 7: Main
 
 ```javascript
-let sent = 0;
+const phone = normalizePhone(f['fldpKCnwHhMYvREDj'] ?? '');
+const name  = f['fldUqmulwBHGQCcxh'] ?? '';
+const lang  = f['fld5vXtGIvU1unHuR']?.name ?? 'English';
 
-for (const record of eligible) {
-  const f = record.fields; // ajustar si API devuelve cellValuesByFieldId
-  const phone = normalizePhone(f['fldpKCnwHhMYvREDj'] ?? '');
-  const name = f['fldUqmulwBHGQCcxh'] ?? '';
-  const lang = f['fld5vXtGIvU1unHuR']?.name ?? 'English';
+if (!phone || phone.length < 12) throw new Error(`Teléfono inválido: ${phone}`);
 
-  if (!phone || phone.length < 10) {
-    console.log(`[SKIP] ${name} — teléfono inválido: ${phone}`);
-    continue;
-  }
+const msg = buildSMS(name, lang);
+console.log(`[SEND] ${name} (${phone}) [${lang}]`);
 
-  const msg = buildMessage(name, lang);
-  console.log(`[SEND] ${name} (${phone}) [${lang}]`);
+const result = await sendSMS(phone, msg);
+console.log(`[OK] SID: ${result.sid}`);
 
-  try {
-    const result = await sendSMS(phone, msg);
-    console.log(`[OK] SID: ${result.sid ?? 'dry_run'}`);
-    await markRequested(record.id, 'FIELD_ID_REVIEW_REQUESTED_AT'); // reemplazar con field ID real
-    sent++;
-  } catch (err) {
-    console.error(`[ERROR] ${name}: ${err.message}`);
-  }
+const REVIEW_FIELD_ID = 'REEMPLAZAR_CON_FIELD_ID_REAL';
+await markRequested(record.id, REVIEW_FIELD_ID);
 
-  // Pausa entre envíos (evitar rate limiting)
-  await new Promise(r => setTimeout(r, 1000));
-}
-
-console.log(`\n✅ Review requests enviadas: ${sent} / ${eligible.length}`);
+console.log('✅ Review request enviada');
 ```
+
+---
+
+## WEBHOOK ROUTER — modificación requerida
+
+En el router del geo-webhook, agregar el case `review_request`:
+
+```javascript
+case 'review_request':
+  // payload debe incluir lead_id
+  const { lead_id } = body;
+  if (!lead_id) return res.status(400).json({ error: 'lead_id requerido' });
+  spawnAgent('review_request/review_request.mjs', [lead_id]);
+  return res.json({ ok: true, queued: true });
+```
+
+---
+
+## UI — Botón en CRM
+
+En la app del CRM (dashboard o Geo Social), agregar botón **"📩 Request Review"** en el detalle de un lead/job completado.
+
+Al hacer click:
+
+```javascript
+async function requestReview(leadId) {
+  const res = await fetch('/api/agents/review_request/trigger', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      tenant: 'geo-carpentry',
+      agent: 'review_request',
+      lead_id: leadId,
+    }),
+  });
+  const data = await res.json();
+  if (data.ok) alert('✅ Review request enviada!');
+  else alert('❌ Error: ' + data.error);
+}
+```
+
+El botón debe:
+- Mostrarse solo si el job está marcado como completado
+- Deshabilitarse si `Review Requested At` tiene fecha dentro de 30 días (para evitar duplicados visibles)
 
 ---
 
 ## CLIENTES ELEGIBLES HOY (2026-08-19)
 
-De 10 records en Geo_Leads, **3 son elegibles**:
-
 | Record ID | Nombre | Teléfono | Job | Lang |
 |---|---|---|---|---|
-| rec6NOxpJuKTiCfBF | Nedd & Jill Schommer | 19204285771 | 224 paradise ln, little chute | EN |
-| recNkc9RWxslm0Ywl | Robin | 19208831500 | Egg harbor job | EN |
-| recukaLRzAUBDfJKW | Andrea Vandermeulen | 19204129544 | 1340 Harvey st | EN |
-
-Ningún cliente con job confirmado en español aún.
-
-**Excluidos:**
-- recELeU1mkLz3IV7i (Inbound 2026-06-03) — DNC=true
-- recH6SIUOtgrWdftr (Joseph) — DNC=true
-- 5 records sin job linked (leads en pipeline, no clientes)
-
----
-
-## SCHEDULE / EJECUCIÓN
-
-Correr **manualmente por Jorge** la primera vez con `DRY_RUN=true` para verificar output.
-
-Después del OK de Jorge → correr sin DRY_RUN.
-
-Frecuencia sugerida: **semanal** (viernes o lunes por la mañana). Agregar al crontab:
-```bash
-# Review requests — lunes 9am Central (15:00 UTC)
-0 15 * * 1 cd /opt/alex-bot && DRY_RUN=false node agents/review_request/review_request.mjs >> /opt/alex-bot/logs/review_request.log 2>&1
-```
-
-**IMPORTANTE:** Confirmar el crontab entry con Jorge antes de agregar.
+| rec6NOxpJuKTiCfBF | Nedd & Jill Schommer | +19204285771 | 224 paradise ln, little chute | EN |
+| recNkc9RWxslm0Ywl | Robin | +19208831500 | Egg harbor job | EN |
+| recukaLRzAUBDfJKW | Andrea Vandermeulen | +19204129544 | 1340 Harvey st | EN |
 
 ---
 
 ## CHECKLIST PARA CC
 
 - [ ] Verificar `TWILIO_*` credentials en `/opt/alex-bot/.env`
-- [ ] Confirmar `GOOGLE_REVIEW_URL` con Jorge (agregar al `.env`)
-- [ ] Crear campo `Review Requested At` (Date) en Geo_Leads via Airtable
-- [ ] Anotar el field ID del nuevo campo y actualizar `markRequested()`
+- [x] `GOOGLE_REVIEW_URL` confirmado: `https://g.page/r/CW11zSNR9BL0EBM/review` ✅ 2026-08-23
+- [ ] Crear campo `Review Requested At` (Date) en Geo_Leads vía Airtable API
+- [ ] Anotar field ID del nuevo campo y reemplazar `REEMPLAZAR_CON_FIELD_ID_REAL` en el código
 - [ ] Instalar twilio: `cd /opt/alex-bot && npm install twilio`
-- [ ] Primera ejecución: `DRY_RUN=true node agents/review_request/review_request.mjs`
+- [ ] Modificar webhook router para enrutar `agent: 'review_request'` con `lead_id`
+- [ ] Agregar botón "Request Review" en CRM UI
+- [ ] Primera prueba: `DRY_RUN=true node agents/review_request/review_request.mjs rec6NOxpJuKTiCfBF`
 - [ ] Mostrar output a Jorge para aprobación
-- [ ] Ejecución real solo después de OK de Jorge
+- [ ] Ejecución real solo con OK de Jorge
 
 ---
 
 ## SEGURIDAD
 
 - NUNCA enviar a DNC=true
-- NUNCA re-enviar dentro de 30 días
-- NUNCA tocar `/opt/alex-bot` crontab sin confirmar con Jorge
+- NUNCA re-enviar dentro de 30 días al mismo cliente
+- NUNCA agregar cron para este agente — es manual únicamente
 - DRY_RUN=true obligatorio en primera prueba
-- Loggear cada envío con timestamp en `/opt/alex-bot/logs/review_request.log`
+- Loggear cada envío en `/opt/alex-bot/logs/review_request.log`
