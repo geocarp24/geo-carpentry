@@ -1,0 +1,22 @@
+[Unit]
+Description=Geo Webhook Service — multi-tenant agent trigger receiver
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/geo-webhook
+EnvironmentFile=/opt/geo-webhook/.env
+ExecStart=/usr/bin/node /opt/geo-webhook/index.mjs
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=full
+ReadWritePaths=/opt/geo-webhook /opt/alex-bot /var/log
+
+[Install]
+WantedBy=multi-user.target
